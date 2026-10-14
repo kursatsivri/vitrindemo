@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vitrin
 
-## Getting Started
+Bağımsız rap ve beat keşif platformu. Ürün tanımı ve fazlar: [SPEC.md](SPEC.md).
 
-First, run the development server:
+Next.js (App Router) · Tailwind · Supabase (Postgres, Auth, Storage) · Vercel
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Ortamlar
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| | Geliştirme (`vitrin-dev`) | Canlı (`vitrin`) |
+|---|---|---|
+| Kullanan | localhost + Vercel önizlemeleri | vitrindemo-three.vercel.app |
+| Anahtarlar | `.env.local` | sadece Vercel (Production) |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`.env.local` git'e girmez; gerekli değişken adları `.env.example`'da. Canlı anahtarlar hiçbir dosyada tutulmaz.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Komutlar
 
-## Learn More
+| Komut | Ne yapar |
+|---|---|
+| `npm run dev` | localhost:3000 (geliştirme DB'si) |
+| `npm run check` | lint + tip kontrolü + build — her commit'ten önce |
+| `npm run test:db` | Güvenlik testini bağlı (link'li) Supabase projesinde çalıştırır; iz bırakmaz |
+| `npx supabase db push --linked` | Yeni migration'ları bağlı projeye uygular |
+| `npx supabase gen types typescript --linked --schema public > lib/database.types.ts` | DB tiplerini günceller |
 
-To learn more about Next.js, take a look at the following resources:
+## İş akışı
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Her iş ayrı dalda: `git switch -c faz-2`.
+2. Veritabanı değişikliği `supabase/migrations/` altında yeni bir dosya olarak yazılır, **önce geliştirme DB'sine** uygulanır (`npx supabase db push --linked`), `npm run test:db` ile denenir. Migration'lar geriye uyumlu yazılır (eski kod yeni şemayla çalışabilmeli).
+3. `git push -u origin <dal>` → GitHub'da PR aç. CI (`app` + `db` işleri) ve Vercel önizlemesi otomatik çalışır.
+4. Önizlemede dene. CI yeşilse, **birleştirmeden hemen önce** migration'ları canlıya uygula:
+   ```
+   npx supabase link --project-ref smhmlndvjguxgapductd   # canlı
+   npx supabase db push --linked
+   npx supabase link --project-ref <dev-ref>              # geri geliştirmeye
+   ```
+5. PR'ı **Merge** et → Vercel canlıya yayınlar. `main`'e doğrudan push kapalı.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## CI (`.github/workflows/ci.yml`)
 
-## Deploy on Vercel
+- **app:** lint, tip kontrolü, build, `npm audit --omit=dev` (siteye giden bağımlılıklar).
+- **db:** GitHub sunucusunda boş bir Supabase açıp tüm migration'ları sıfırdan uygular, `supabase/tests/` altındaki güvenlik testini çalıştırır.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`npm audit` (dev dahil) ESLint'in alt bağımlılığı `braces` için uyarı verir: sadece geliştirmede çalışır, siteye gitmez. `npm audit fix --force` eslint-config-next'i eski sürüme düşürüp kurulumu bozar; yapma.
