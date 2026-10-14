@@ -4,20 +4,19 @@ Bağımsız rap ve beat keşif platformu. Ürün tanımı ve fazlar: [SPEC.md](S
 
 Next.js (App Router) · Tailwind · Supabase (Postgres, Auth, Storage) · Vercel
 
-## Ortamlar
+## Ortam
 
-| | Geliştirme (`vitrin-dev`) | Canlı (`vitrin`) |
-|---|---|---|
-| Kullanan | localhost + Vercel önizlemeleri | vitrindemo-three.vercel.app |
-| Anahtarlar | `.env.local` | sadece Vercel (Production) |
+Bu repo ve Supabase projesi (`vitrin`, ref `smhmlndvjguxgapductd`) **demo/geliştirme** ortamıdır: localhost, Vercel önizlemeleri ve vitrindemo-three.vercel.app aynı veritabanını kullanır, içindeki hesaplar test amaçlıdır.
 
-`.env.local` git'e girmez; gerekli değişken adları `.env.example`'da. Canlı anahtarlar hiçbir dosyada tutulmaz.
+Gerçek kullanıcıya açılırken (SPEC Faz 5) **boş, yeni bir canlı Supabase projesi** açılır ve `supabase/migrations/` oraya sıfırdan uygulanır — CI'daki `db` işi bunun her zaman çalıştığını kanıtlar. Demo verisi canlıya taşınmaz.
+
+Anahtarlar `.env.local`'de (git'e girmez; değişken adları `.env.example`'da) ve Vercel'de.
 
 ## Komutlar
 
 | Komut | Ne yapar |
 |---|---|
-| `npm run dev` | localhost:3000 (geliştirme DB'si) |
+| `npm run dev` | localhost:3000 |
 | `npm run check` | lint + tip kontrolü + build — her commit'ten önce |
 | `npm run test:db` | Güvenlik testini bağlı (link'li) Supabase projesinde çalıştırır; iz bırakmaz |
 | `npx supabase db push --linked` | Yeni migration'ları bağlı projeye uygular |
@@ -26,15 +25,9 @@ Next.js (App Router) · Tailwind · Supabase (Postgres, Auth, Storage) · Vercel
 ## İş akışı
 
 1. Her iş ayrı dalda: `git switch -c faz-2`.
-2. Veritabanı değişikliği `supabase/migrations/` altında yeni bir dosya olarak yazılır, **önce geliştirme DB'sine** uygulanır (`npx supabase db push --linked`), `npm run test:db` ile denenir. Migration'lar geriye uyumlu yazılır (eski kod yeni şemayla çalışabilmeli).
+2. Veritabanı değişikliği `supabase/migrations/` altında yeni bir dosya olarak yazılır; önce CI'da (boş DB) ve `npm run test:db` ile denenir, sonra `npx supabase db push --linked` ile uygulanır. Migration'lar geriye uyumlu yazılır (eski kod yeni şemayla çalışabilmeli).
 3. `git push -u origin <dal>` → GitHub'da PR aç. CI (`app` + `db` işleri) ve Vercel önizlemesi otomatik çalışır.
-4. Önizlemede dene. CI yeşilse, **birleştirmeden hemen önce** migration'ları canlıya uygula:
-   ```
-   npx supabase link --project-ref smhmlndvjguxgapductd   # canlı
-   npx supabase db push --linked
-   npx supabase link --project-ref <dev-ref>              # geri geliştirmeye
-   ```
-5. PR'ı **Merge** et → Vercel canlıya yayınlar. `main`'e doğrudan push kapalı.
+4. Önizlemede dene; CI yeşilse PR'ı **Merge** et → Vercel vitrindemo-three.vercel.app'e yayınlar. `main`'e doğrudan push kapalı.
 
 ## CI (`.github/workflows/ci.yml`)
 
