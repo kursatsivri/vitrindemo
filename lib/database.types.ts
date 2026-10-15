@@ -37,6 +37,45 @@ export type Database = {
           },
         ]
       }
+      plays: {
+        Row: {
+          counted_at: string | null
+          day: string
+          started_at: string
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          counted_at?: string | null
+          day: string
+          started_at?: string
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          counted_at?: string | null
+          day?: string
+          started_at?: string
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plays_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plays_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_path: string | null
@@ -73,12 +112,63 @@ export type Database = {
         }
         Relationships: []
       }
+      tracks: {
+        Row: {
+          artist_id: string
+          audio_path: string
+          cover_path: string | null
+          created_at: string
+          description: string | null
+          duration_sec: number | null
+          genre: string
+          id: string
+          rights_confirmed: boolean
+          status: string
+          title: string
+        }
+        Insert: {
+          artist_id: string
+          audio_path: string
+          cover_path?: string | null
+          created_at?: string
+          description?: string | null
+          duration_sec?: number | null
+          genre: string
+          id?: string
+          rights_confirmed: boolean
+          status?: string
+          title: string
+        }
+        Update: {
+          artist_id?: string
+          audio_path?: string
+          cover_path?: string | null
+          created_at?: string
+          description?: string | null
+          duration_sec?: number | null
+          genre?: string
+          id?: string
+          rights_confirmed?: boolean
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      count_play: { Args: { p_track: string }; Returns: boolean }
+      start_play: { Args: { p_track: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
