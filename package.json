@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run build",
+    "test": "node --no-warnings --test lib/*.test.ts",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "test:db": "scripts/test-db.sh --linked"
   },
   "dependencies": {

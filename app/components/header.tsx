@@ -20,11 +20,14 @@ async function UserNav() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, display_name, avatar_path")
+    .select("role, username, display_name, avatar_path")
     .eq("id", userId)
     .single();
   return (
     <>
+      {profile?.role === "artist" && (
+        <Link href="/yukle" className="btn-primary py-2">+ Yükle</Link>
+      )}
       <form action={signOut}>
         <button type="submit" className="text-muted hover:text-foreground">Çıkış</button>
       </form>
