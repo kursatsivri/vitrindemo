@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Notice } from "./notice";
 
 export type FormState = { error?: string; message?: string };
 
@@ -19,21 +20,9 @@ export function ActionForm({
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {children}
-      {state.error && (
-        <p role="alert" className="rounded-md bg-red-950 px-3 py-2 text-sm text-red-200">
-          {state.error}
-        </p>
-      )}
-      {state.message && (
-        <p role="status" className="rounded-md bg-emerald-950 px-3 py-2 text-sm text-emerald-200">
-          {state.message}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-white px-4 py-2 font-medium text-black disabled:opacity-50"
-      >
+      {state.error && <Notice tone="error">{state.error}</Notice>}
+      {state.message && <Notice tone="success">{state.message}</Notice>}
+      <button type="submit" disabled={pending} className="btn-primary mt-1">
         {pending ? "Bekleyin…" : submitLabel}
       </button>
     </form>

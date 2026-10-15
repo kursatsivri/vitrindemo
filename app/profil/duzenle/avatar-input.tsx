@@ -45,11 +45,11 @@ export function AvatarInput({
     <div className="flex items-center gap-4">
       <Avatar path={path} name={name} size={80} />
       <div className="flex flex-col gap-1 text-sm">
-        <label className="cursor-pointer rounded-md border border-neutral-700 px-3 py-2">
+        <label className="btn-secondary cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent">
           {busy ? "Yükleniyor…" : "Fotoğraf seç"}
           <input type="file" accept={TYPES.join(",")} onChange={onChange} disabled={busy} className="sr-only" />
         </label>
-        <span className="text-xs text-neutral-500">JPG, PNG, WebP · en fazla 2 MB</span>
+        <span className="text-xs text-subtle">JPG, PNG, WebP · en fazla 2 MB</span>
         {error && <span role="alert" className="text-xs text-red-300">{error}</span>}
       </div>
       <input type="hidden" name="avatar_path" value={path ?? ""} readOnly />

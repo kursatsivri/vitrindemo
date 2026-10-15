@@ -47,28 +47,26 @@ async function EditForm() {
           autoCapitalize="none"
         />
         <Field label="Görünen ad" name="display_name" defaultValue={profile.display_name ?? ""} maxLength={50} />
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-neutral-300">Kısa biyografi</span>
-          <textarea
-            name="bio"
-            defaultValue={profile.bio ?? ""}
-            maxLength={300}
-            rows={4}
-            className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-base text-white"
-          />
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-muted">Kısa biyografi</span>
+          <textarea name="bio" defaultValue={profile.bio ?? ""} maxLength={300} rows={4} className="input" />
         </label>
 
         {isArtist && (
           <>
-            <fieldset className="flex gap-4 text-sm">
-              <legend className="mb-1 text-neutral-300">Tür</legend>
+            <fieldset className="flex gap-2 text-sm">
+              <legend className="mb-1.5 font-medium text-muted">Tür</legend>
               {GENRES.map((g) => (
-                <label key={g.value} className="flex items-center gap-2">
+                <label
+                  key={g.value}
+                  className="cursor-pointer rounded-full border border-border bg-surface-2 px-4 py-1.5 font-medium transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/10 has-[:checked]:text-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
+                >
                   <input
                     type="checkbox"
                     name="genres"
                     value={g.value}
                     defaultChecked={profile.genres.includes(g.value)}
+                    className="sr-only"
                   />
                   {g.label}
                 </label>
@@ -94,8 +92,8 @@ async function EditForm() {
           </>
         )}
       </ActionForm>
-      <Link href={`/${profile.username}`} className="text-sm text-neutral-400 underline">
-        Profilimi görüntüle
+      <Link href={`/${profile.username}`} className="text-sm text-muted hover:text-foreground">
+        Profilimi görüntüle →
       </Link>
     </>
   );
@@ -104,8 +102,8 @@ async function EditForm() {
 export default function Page() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-10">
-      <h1 className="text-2xl font-semibold">Profili düzenle</h1>
-      <Suspense fallback={<p className="text-neutral-400">Yükleniyor…</p>}>
+      <h1 className="font-display text-3xl font-bold tracking-tight">Profili düzenle</h1>
+      <Suspense fallback={<p className="text-muted">Yükleniyor…</p>}>
         <EditForm />
       </Suspense>
     </main>
