@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    env:
+      # Build için sahte değerler; gerçek anahtarlar sadece Vercel'de.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+      # Siteye giden bağımlılıklarda yüksek riskli açık varsa kırmızı.
+      - run: npm audit --omit=dev --audit-level=high
+
+  db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Boş bir yerel Supabase'e tüm migration'ları sıfırdan uygular.
+      - run: npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,mailpit,supavisor
+      - name: Güvenlik testi
+        run: |
+          npx supabase db query --local -f supabase/tests/profiles_security.sql | tee out.txt
+          grep -q "OK:" out.txt
