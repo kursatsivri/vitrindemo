@@ -8,7 +8,7 @@ Next.js (App Router) · Tailwind · Supabase (Postgres, Auth, Storage) · Vercel
 
 Bu repo ve Supabase projesi (`vitrin`, ref `smhmlndvjguxgapductd`) **demo/geliştirme** ortamıdır: localhost, Vercel önizlemeleri ve vitrindemo-three.vercel.app aynı veritabanını kullanır, içindeki hesaplar test amaçlıdır.
 
-Gerçek kullanıcıya açılırken (SPEC Faz 5) **boş, yeni bir canlı Supabase projesi** açılır ve `supabase/migrations/` oraya sıfırdan uygulanır — CI'daki `db` işi bunun her zaman çalıştığını kanıtlar. Demo verisi canlıya taşınmaz.
+Gerçek kullanıcıya açılırken (SPEC Faz 8) **boş, yeni bir canlı Supabase projesi** açılır ve `supabase/migrations/` oraya sıfırdan uygulanır — CI'daki `db` işi bunun her zaman çalıştığını kanıtlar. Demo verisi canlıya taşınmaz.
 
 Anahtarlar `.env.local`'de (git'e girmez; değişken adları `.env.example`'da) ve Vercel'de.
 
