@@ -1,6 +1,6 @@
 # Vitrin
 
-Bağımsız rap ve beat keşif platformu. Ürün tanımı ve fazlar: [SPEC.md](SPEC.md).
+Bağımsız müzisyenler için yetenek keşif platformu (Tinder mantığında: yetenekler keşfedilir, keşifçiler bulur). Ürün tanımı ve fazlar: [SPEC.md](SPEC.md).
 
 Next.js (App Router) · Tailwind · Supabase (Postgres, Auth, Storage) · Vercel
 

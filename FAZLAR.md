@@ -1,110 +1,129 @@
 # Vitrin — Fazlar ve yol haritası
 
-Son güncelleme: 16 Ekim 2026 · Ayrıntılı ürün tanımı: [SPEC.md](SPEC.md)
+Son güncelleme: 16 Ekim 2026 · Ayrıntılı kurallar: [SPEC.md](SPEC.md)
 
-Toplam **7 faz** var (0'dan 6'ya). Her faz bitince: çalıştırılır, test edilir, GitHub'a gönderilir, Vercel önizlemesinde kontrol edilir, sonra canlıya alınır.
+**Vitrin nedir?** Spotify gibi bir dinleme sitesi değil; Tinder mantığında bir **keşfedilme platformu**. Yetenekler (rapçi, şarkıcı, beatmaker) keşfedilmek için gelir; keşifçiler (yapımcı, plak şirketi, menajer) yeni yetenek bulmak için gelir; dinleyiciler oylarıyla sıralamayı belirler.
+
+Toplam **10 faz** (0–9). Her faz: çalıştırılır → test edilir → GitHub'a gönderilir → Vercel önizlemesinde kontrol edilir → PR ile canlıya alınır.
 
 | Faz | Konu | Durum |
 |---|---|---|
 | 0 | Kurulum | ✅ Bitti |
 | 1 | Hesap ve profil | ✅ Bitti |
-| 2 | Parça yükleme, akış, oynatıcı | ✅ Kod bitti, test edildi — merge bekliyor |
-| 3 | Oylama ve sıralama | ⏳ Sırada |
-| 4 | Plak şirketleri ve favoriler | ⏳ |
-| 5 | Şikayet, moderasyon, yasal sayfalar, canlıya çıkış | ⏳ |
-| 6 | Ödeme ve üyelik paketleri (sonra) | ⏳ |
+| 2 | Parça yükleme, akış, oynatıcı, dinleme kaydı | ✅ Bitti — merge bekliyor |
+| 3 | Türler, parça sayfası, beğeni, kaydet, takip, yorum | ⏳ Sırada |
+| 4 | Oylama ve sıralamalar | ⏳ |
+| 5 | Keşfet modu (kaydırma) ve öneri sistemi | ⏳ |
+| 6 | Keşifçi tarafı ve eşleşme | ⏳ |
+| 7 | Bildirimler, şikayet, yönetici paneli | ⏳ |
+| 8 | Canlıya çıkış | ⏳ |
+| 9 | Premium üyelik ve mesajlaşma | ⏳ (şirket kaydından sonra) |
 
-Ayrıca fazlardan bağımsız bir iş daha var: **🎨 Tasarım** (aşağıda).
+> **Değişmez kural:** Parayla sıralamada yükselme hiçbir fazda olmayacak.
 
 ---
 
 ## Faz 0 — Kurulum ✅
-- Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya depolama) bağlantısı
-- GitHub reposu ve Vercel'de yayın: vitrindemo-three.vercel.app
-- **Bitti sayılma şartı:** Boş site Vercel'de açılıyor ✔
+Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Vercel'de yayın.
 
 ## Faz 1 — Hesap ve profil ✅
-- E-posta + şifre ile kayıt ve giriş, e-posta doğrulaması, şifre sıfırlama
-- Kayıtta **Dinleyici** veya **Sanatçı** seçimi
-- Profil: kullanıcı adı, görünen ad, fotoğraf, biyografi, tür (Rap/Beat), Instagram / YouTube / Spotify / SoundCloud linkleri
-- Sanatçının iletişim e-postası (sadece onaylı plak şirketleri görecek)
-- Herkese açık profil sayfası: `/kullaniciadi`
-- Güvenlik testi: kimse başkasının profilini değiştiremez, kendine yönetici rolü veremez
-- **Bitti sayılma şartı:** Sanatçı ve dinleyici hesabı açılıp profil görüntülenebiliyor ✔
+- Kayıt/giriş, e-posta doğrulama, şifre sıfırlama
+- Dinleyici / Sanatçı seçimi
+- Profil: fotoğraf, biyografi, türler, sosyal linkler, iletişim e-postası
+- Herkese açık profil sayfası
+- Güvenlik testi (kimse başkasının profilini değiştiremez)
+- **+ Sağlamlaştırma:** otomatik kontroller (CI), dal + PR ile çalışma
 
-### Sağlamlaştırma (Faz 1 ile 2 arası) ✅
-- Otomatik kontroller (CI): her gönderimde kod kontrolü, build ve boş veritabanında güvenlik testi
-- Dal + PR ile çalışma; `main`'e doğrudan gönderim kapalı
-- ⚠️ GitHub hesabındaki fatura kilidi yüzünden CI şu an çalışmıyor; aynı kontroller her commit öncesi bilgisayarda çalıştırılıyor
+## Faz 2 — Parça yükleme, akış, oynatıcı ✅
+- Parça yükleme: MP3, kapak, "haklar bende" onayı, haftada en fazla 3 parça
+- Parça düzenleme ve silme
+- Ana sayfa "Yeni yüklenenler" akışı + filtre
+- Sayfa değişince durmayan alt oynatıcı
+- 30 saniye dinleme kaydı (sunucu doğrular, günde 1)
 
-## Faz 2 — Parça yükleme, akış, oynatıcı ✅ (merge bekliyor)
-- **Parça yükleme** (`/yukle`, sadece sanatçı): MP3 (en fazla 15 MB), başlık, Rap/Beat, kapak (en fazla 3 MB, opsiyonel), açıklama
-- "Bu parçanın tüm hakları bende" onayı zorunlu
-- Haftada en fazla **3 parça** (pazartesi 00:00'da yenilenir)
-- Sanatçı kendi parçasını düzenler ve siler
-- **Ana sayfa:** "Yeni yüklenenler" akışı, Hepsi / Rap / Beat filtresi
-- **Alt oynatıcı:** oynat/duraklat, ileri-geri sarma, ses; sayfa değişince müzik durmaz
-- **Dinleme kaydı:** giriş yapmış biri 30 saniye dinleyince sayılır (sunucu kontrol eder), aynı kişi aynı parçayı günde 1 kez
-- Güvenlik testi: dinleyici yükleyemez, kimse başkasının parçasını değiştiremez, 4. parça reddedilir
-- **Bitti sayılma şartı:** Yüklenen parça akışta görünüyor ve çalınıyor ✔ (gerçek parçayla denendi)
+## Faz 3 — Türler ve etkileşim ⏳ (sırada)
+- **Türkiye'de çok dinlenen türler:** Rap/Hip-Hop, Beat/Prodüksiyon, Pop, Arabesk/Fantezi, R&B/Soul, Rock/Alternatif, Elektronik/Dans, Akustik/Indie, Türkü/Halk
+- **Etiketler:** alt tür (trap, drill, boom bap, melodik rap, arabesk rap…) ve ruh hali (sert, duygusal, chill…)
+- **"En iyi an":** sanatçı parçanın en vurucu yerini işaretler (keşfet modunda oradan çalar)
+- **Feat:** başka sanatçıları parçaya etiketleme · beat'ler için "Rapçi arıyorum" etiketi
+- **Parça sayfası** + paylaşım linki (WhatsApp'ta kapaklı önizleme)
+- **Beğeni** (kalp) — sıralamayı etkilemez
+- **Kaydet** — kişisel kitaplık
+- **Takip** — takip ettiklerinin yeni parçaları ayrı akışta
+- **Yorum** — herkese açık; sanatçı kendi parçasındaki yorumu silebilir/kapatabilir; küfür filtresi
+- Profile **şehir**, **öne çıkan parça**, **"keşfedilmeye açığım"**
+- Oynatıcıda **önceki/sonraki**, bitince sıradakine geçme
 
-## Faz 3 — Oylama ve sıralama ⏳ (sitenin kalbi)
-**Oylama kuralları** — hepsi sunucuda, kandırılamaz şekilde:
-- Sadece **beğeni** (yukarı oy); eksi oy yok, kimse rakibini batıramaz
-- Dinleyici ve sanatçılar oy verir; plak şirketi ve yönetici veremez
-- Kendi parçana oy veremezsin
-- Aynı parçaya **haftada en fazla 1 oy**
-- Oy vermek için parçayı **en az 30 saniye dinlemiş** olmak gerekir (Faz 2'deki dinleme kaydı)
-- **Yeni hesap kuralı:** 7 günden yeni hesapların oyu kaydedilir ama sıralamada sayılmaz
+## Faz 4 — Oylama ve sıralamalar ⏳ (sitenin kalbi)
+- **Oy ≠ beğeni.** Oy sıralamayı belirler; kuralları sıkı:
+  - Sadece yukarı oy · kendi parçana oy yok · aynı parçaya haftada 1 oy
+  - Oy için en az 30 saniye dinlemiş olmak şart
+  - 7 günden yeni hesapların oyu sıralamada sayılmaz
+  - Keşifçi ve yönetici oy veremez
+- **Haftalık sıralama** ve **aylık top 10**, her tür için ayrı
+- **Yükselenler** (yeni yeteneklere şans) · **Şehir sıralaması**
+- Ana sayfada "Bu haftanın zirvesi"
+- Geçmiş haftalar arşivi, profilde "En iyi derece" rozeti
+- Instagram hikâyesine hazır sıralama görseli
+- **Sahte oy koruması:** kayıtta captcha, hız sınırları, şüpheli hesap kümelerinin tespiti
 
-**Sıralama:**
-- **Haftalık** (pazartesi–pazar) ve **aylık**, Rap ve Beat ayrı ayrı
-- Skor = o dönemdeki geçerli oy sayısı; eşitlikte oyu daha erken toplayan üstte
-- Ana sayfada "Bu haftanın zirvesi" (ilk 10)
-- Büyük, okunaklı **sıralama sayfası** — Instagram'da paylaşılacak gibi
-- Dönem bitince liste dondurulur ve arşivlenir ("Geçmiş haftalar")
-- Sanatçı profilinde toplam oy ve "En iyi derece: Rap #3, Kasım 2. hafta" gibi rozet
-- **Bitti sayılma şartı:** Yukarıdaki tüm oylama kuralları sunucu tarafında test edildi
+## Faz 5 — Keşfet modu ve öneriler ⏳ (Tinder kısmı)
+- Tam ekran kart: parça "en iyi an"dan çalar · **sağa = beğen, sola = geç**, kaydet
+- 30 sn dinleyince karttan oy da verilebilir
+- Filtre: tür, etiket, ruh hali, şehir · görülen parça tekrar gelmez
+- İlk girişte **tercih seçimi** (türler, etiketler, şehir)
+- **Öneri sistemi:** "Sana özel", "bunu beğenenler şunu da beğendi", yeni yeteneklere garanti pay
+- **Arama:** sanatçı ve parça
 
-## Faz 4 — Plak şirketleri ve favoriler ⏳
-- Plak şirketi başvuru formu: şirket adı, web sitesi/Instagram, yetkili kişi, iletişim e-postası, kısa açıklama
-- Yönetici onaylayana kadar hesap "beklemede", özellikler kapalı
-- Onaylı şirket: "Onaylı Plak Şirketi" rozeti, sanatçıları **favorilere ekleme** (liste sadece kendine görünür), sanatçının iletişim e-postasını görme
-- Yönetici için başvuru onay/ret ekranı
-- **Bitti sayılma şartı:** Onaylanmamış şirket hiçbir özelliğe erişemiyor
+## Faz 6 — Keşifçi tarafı ve eşleşme ⏳
+- **Keşifçi** hesabı (yapımcı / plak şirketi / menajer): başvuru → yönetici onayı → "Onaylı Keşifçi" rozeti
+- Keşfet modunda "Favorile" ve "İlgi gönder" butonları
+- **İlgi → eşleşme:** sanatçı kabul ederse iletişim bilgileri iki tarafa açılır (Tinder'ın "match"i)
+- Favoriler ve sanatçılar hakkında **özel notlar**
+- Gelişmiş arama (oy, yükselme hızı, keşfedilmeye açık olanlar)
+- **Yetenek alarmı:** kriterlere uyan biri yükselince haber ver
+- Sanatçıya istatistik: dinlenme, beğeni, kaydetme, oy, takipçi, **"Profilini bu hafta X keşifçi görüntüledi"**
 
-## Faz 5 — Şikayet, moderasyon, yasal sayfalar, canlıya çıkış ⏳
-- Her parçada ve profilde **"Şikayet et"**: telif ihlali, uygunsuz içerik, sahte hesap, diğer
-- **Yönetici paneli** (`/admin`): şikayetler, şirket başvuruları, parça/hesap gizleme-kaldırma
-- **Yasal sayfalar:** kullanım şartları, KVKK aydınlatma metni, çerez bilgilendirmesi, telif ihlali bildirimi (taslak; yayından önce gözden geçirilecek)
-- **Canlıya çıkış hazırlığı:**
-  - Sitenin kesin adı ve **alan adı** (domain)
-  - Boş, yeni bir **canlı Supabase projesi**; demo verisi taşınmaz
-  - Türkçe e-posta şablonları + özel e-posta gönderici (alan adı gerekli)
-  - Gerçek logo, son tasarım rötuşları
-- **Bitti sayılma şartı:** Site gerçek kullanıcıya açılabilir
+## Faz 7 — Bildirimler ve güvenlik ⏳
+- **Bildirim merkezi:** takipçi, beğeni, yorum, "ilk 10'a girdin", ilgi/eşleşme, takip ettiğin sanatçının yeni parçası
+- Önemli olanlar için e-posta (kapatılabilir)
+- **Şikayet et** (parça, yorum, profil): telif, uygunsuz içerik, sahte hesap, taciz
+- **Engelleme**
+- **Yönetici paneli:** keşifçi başvuruları, şikayetler, şüpheli oylar, içerik/hesap kaldırma, **Editörün seçimi**
 
-## Faz 6 — Ödeme ve üyelik paketleri ⏳ (sonra)
-- Sanatçı ve plak şirketi için ücretli paketler
-- Ödeme altyapısı (Türkiye için iyzico / PayTR vb.)
-- **Ön şart:** şirket/vergi kaydı ve paket içeriklerinin belirlenmesi
+## Faz 8 — Canlıya çıkış ⏳ (gerçek kullanıcıya açılış)
+- Yasal sayfalar: kullanım şartları, KVKK, çerezler, telif bildirimi (hukukçu kontrolü)
+- **Hesap silme** ve **verilerimi indir** (KVKK)
+- Sitenin kesin adı ve **alan adı**
+- Boş, yeni **canlı Supabase** (Pro: günlük yedek); test verisi taşınmaz
+- Türkçe e-posta şablonları + özel e-posta gönderici
+- Hata takibi (Sentry)
+- Telefona uygulama gibi ekleme (PWA) + kilit ekranında müzik kontrolü
+- **Son tasarım ve gerçek logo**
+
+## Faz 9 — Premium ve mesajlaşma ⏳ (sonra)
+- **Mesajlaşma:** ücretsiz hesaplar mesaj başlatamaz; engelleme, şikayet
+- Premium paketleri (sanatçı ve keşifçi için ayrı): örn. profilini görüntüleyen keşifçilerin adları, detaylı grafikler
+- Ödeme altyapısı (iyzico / PayTR)
+- **Ön şart:** şirket/vergi kaydı
 
 ---
 
 ## 🎨 Tasarım (fazlardan bağımsız)
-- Seçilen yön: koyu tema, premium/sade, **turuncu** vurgu, şimdilik yazı logo ("vitrin.")
-- Şu an sadece temel stil var; **kullanıcının göndereceği tasarım** gelince tüm sayfalar ona göre giydirilecek
-- Tasarımda olması gereken ekranlar: ana sayfa, alt oynatıcı, sıralama sayfası, sanatçı profili, parça kartı/satırı, formlar (giriş, kayıt, profil düzenleme, yükleme), boş durumlar — masaüstü ve telefon
+- Koyu tema, premium/sade, turuncu vurgu, şimdilik yazı logo
+- **Senin göndereceğin tasarım** gelince tüm ekranlar ona göre giydirilir
+- Tasarlanması gereken ekranlar: ana sayfa, **keşfet modu (kaydırma kartı)**, alt oynatıcı, parça sayfası, sıralama sayfası, profil, keşifçi ekranları, bildirimler, formlar, boş durumlar — masaüstü ve telefon
 
 ## 🚫 Bilerek olmayacaklar
-- **Parayla sıralamada yükselme — hiçbir fazda olmayacak**
-- Uygulama içi mesajlaşma, yorumlar
-- Detaylı istatistik paneli
-- Mobil uygulama (iOS/Android) — site telefonda tam çalışır
-- Rap ve Beat dışındaki türler, İngilizce arayüz
+- **Parayla sıralamada yükselme**
+- Ücretsiz hesaplarda mesaj başlatma
+- Native mobil uygulama (v1'de PWA yeterli)
+- İngilizce arayüz, video, canlı yayın
 
-## ❓ Açık konular
-- Sitenin kesin adı ve alan adı (çalışma adı: Vitrin)
-- Ücretli paketlerin içeriği (Faz 6'dan önce)
-- Ödeme altyapısı (şirket/vergi kaydı gerektirir)
-- GitHub hesabındaki fatura kilidi (CI'ı engelliyor)
+## ❓ Karar bekleyenler
+- **Mesajlaşmada ücretsiz taraf:** Premium keşifçi ücretsiz sanatçıya yazınca sanatçı cevap verebilsin mi? (Önerim: evet, mesaj isteğini kabul ederse — yoksa keşifçiler yeteneklere ulaşamaz)
+- **Erken açılış:** Faz 5'ten sonra davetli kullanıcılarla kapalı beta?
+- Premium paket içerikleri ve fiyatlar
+- Sitenin adı ve alan adı
+- Tür ve etiket listesinin son hali
+- GitHub fatura kilidi (CI'ı engelliyor)
