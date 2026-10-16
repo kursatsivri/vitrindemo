@@ -14,12 +14,14 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchPara
   // ponytail: son 50 parça; akış büyüyünce "daha fazla" (sayfalama) ekle.
   let query = supabase
     .from("tracks")
-    .select("id, title, genre, cover_path, duration_sec, audio_path, status, profiles(username, display_name)")
+    .select("id, title, genre, cover_path, duration_sec, audio_path, status, profiles!artist_id(username, display_name)")
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(FEED_LIMIT);
   if (genre) query = query.eq("genre", genre);
-  const { data: tracks } = await query;
+  const { data: tracks, error } = await query;
+  // Hata "parça yok" gibi görünmesin
+  if (error) throw new Error(`Akış yüklenemedi: ${error.message}`);
 
   const filters = [{ value: null, label: "Hepsi" }, ...GENRES];
   return (

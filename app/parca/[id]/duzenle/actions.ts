@@ -10,7 +10,7 @@ async function ownTrack(id: string) {
   if (!user) redirect("/giris");
   const { data: track } = await supabase
     .from("tracks")
-    .select("id, audio_path, cover_path, profiles(username)")
+    .select("id, audio_path, cover_path, profiles!artist_id(username)")
     .eq("id", id)
     .eq("artist_id", user.id)
     .maybeSingle();

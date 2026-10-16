@@ -26,13 +26,14 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
   const isArtist = profile.role === "artist";
 
   // Gizlenen parçaları RLS sadece sahibine döndürür.
-  const { data: tracks } = isArtist
+  const { data: tracks, error } = isArtist
     ? await supabase
         .from("tracks")
         .select("id, title, genre, audio_path, cover_path, duration_sec, status")
         .eq("artist_id", profile.id)
         .order("created_at", { ascending: false })
-    : { data: [] };
+    : { data: [], error: null };
+  if (error) throw new Error(`Parçalar yüklenemedi: ${error.message}`);
 
   return (
     <article className="flex flex-col gap-6">
