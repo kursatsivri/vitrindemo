@@ -11,11 +11,11 @@ Toplam **10 faz** (0–9). Her faz: çalıştırılır → test edilir → GitHu
 | 0 | Kurulum | ✅ Bitti |
 | 1 | Hesap ve profil | ✅ Bitti |
 | 2 | Parça yükleme, akış, oynatıcı, dinleme kaydı | ✅ Bitti — merge bekliyor |
-| 3 | Türler, parça sayfası, beğeni, kaydet, takip, yorum | ⏳ Sırada |
-| 4 | Oylama ve sıralamalar | ⏳ |
-| 5 | Keşfet modu (kaydırma) ve öneri sistemi | ⏳ |
-| 6 | Keşifçi tarafı ve eşleşme | ⏳ |
-| 7 | Bildirimler, şikayet, yönetici paneli | ⏳ |
+| 3 | Türler, parça sayfası, beğeni, kaydet, takip, yorum, geri bildirim | ⏳ Sırada |
+| 4 | Oylama, sıralamalar, erken keşifçi puanı | ⏳ |
+| 5 | Keşfet modu (kaydırma), öneriler, yakınındaki yetenekler | ⏳ |
+| 6 | Keşifçi tarafı, eşleşme, fırsat panosu | ⏳ |
+| 7 | Bildirimler, şikayet, yönetici paneli, haftalık challenge | ⏳ |
 | 8 | Canlıya çıkış | ⏳ |
 | 9 | Premium üyelik ve mesajlaşma | ⏳ (şirket kaydından sonra) |
 
@@ -46,11 +46,14 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - **Etiketler:** alt tür (trap, drill, boom bap, melodik rap, arabesk rap…) ve ruh hali (sert, duygusal, chill…)
 - **"En iyi an":** sanatçı parçanın en vurucu yerini işaretler (keşfet modunda oradan çalar)
 - **Feat:** başka sanatçıları parçaya etiketleme · beat'ler için "Rapçi arıyorum" etiketi
+- **Dış linkler:** parça Spotify / YouTube / Apple Music / SoundCloud'da da varsa linkleri
 - **Parça sayfası** + paylaşım linki (WhatsApp'ta kapaklı önizleme)
 - **Beğeni** (kalp) — sıralamayı etkilemez
 - **Kaydet** — kişisel kitaplık
 - **Takip** — takip ettiklerinin yeni parçaları ayrı akışta
 - **Yorum** — herkese açık; sanatçı kendi parçasındaki yorumu silebilir/kapatabilir; küfür filtresi
+- **Zaman damgalı yorum** — "1:24'teki geçiş efsane"; ses dalgası üzerinde işaret, tıklayınca o saniyeye gider
+- **Yapılandırılmış geri bildirim** — vokal / flow / söz / prodüksiyon (beat'te: melodi / davul / mix / özgünlük) için 1–5 puan; 30 sn dinlemeden verilemez; sıralamayı etkilemez
 - Profile **şehir**, **öne çıkan parça**, **"keşfedilmeye açığım"**
 - Oynatıcıda **önceki/sonraki**, bitince sıradakine geçme
 
@@ -65,6 +68,7 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - Ana sayfada "Bu haftanın zirvesi"
 - Geçmiş haftalar arşivi, profilde "En iyi derece" rozeti
 - Instagram hikâyesine hazır sıralama görseli
+- **Erken keşifçi puanı ("Ben demiştim"):** parça az oyluyken oy verdiysen ve parça sonra ilk 10'a girerse puan kazanırsın; **"En iyi kulaklar"** dinleyici sıralaması ve rozetler
 - **Sahte oy koruması:** kayıtta captcha, hız sınırları, şüpheli hesap kümelerinin tespiti
 
 ## Faz 5 — Keşfet modu ve öneriler ⏳ (Tinder kısmı)
@@ -74,6 +78,7 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - İlk girişte **tercih seçimi** (türler, etiketler, şehir)
 - **Öneri sistemi:** "Sana özel", "bunu beğenenler şunu da beğendi", yeni yeteneklere garanti pay
 - **Arama:** sanatçı ve parça
+- **Yakınındaki yetenekler:** Türkiye haritası (81 il) — ile tıkla, o şehrin sanatçıları ve şehir sıralaması
 
 ## Faz 6 — Keşifçi tarafı ve eşleşme ⏳
 - **Keşifçi** hesabı (yapımcı / plak şirketi / menajer): başvuru → yönetici onayı → "Onaylı Keşifçi" rozeti
@@ -83,13 +88,15 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - Gelişmiş arama (oy, yükselme hızı, keşfedilmeye açık olanlar)
 - **Yetenek alarmı:** kriterlere uyan biri yükselince haber ver
 - Sanatçıya istatistik: dinlenme, beğeni, kaydetme, oy, takipçi, **"Profilini bu hafta X keşifçi görüntüledi"**
+- **Fırsat panosu:** keşifçiler ilan açar ("Drill rapçi arıyorum", "Açık sahne için sanatçı"), sanatçılar bir parçasıyla başvurur; keşifçi dinler, kısa listeye alır, eşleşme başlatır. Ücretsiz.
 
-## Faz 7 — Bildirimler ve güvenlik ⏳
+## Faz 7 — Bildirimler, güvenlik ve challenge ⏳
 - **Bildirim merkezi:** takipçi, beğeni, yorum, "ilk 10'a girdin", ilgi/eşleşme, takip ettiğin sanatçının yeni parçası
 - Önemli olanlar için e-posta (kapatılabilir)
 - **Şikayet et** (parça, yorum, profil): telif, uygunsuz içerik, sahte hesap, taciz
 - **Engelleme**
 - **Yönetici paneli:** keşifçi başvuruları, şikayetler, şüpheli oylar, içerik/hesap kaldırma, **Editörün seçimi**
+- **Haftalık challenge:** her hafta bir beatmaker'ın beat'i seçilir, rapçiler üzerine yazıp yükler, oylarla kazanan belli olur; kazanan ve beatmaker ana sayfada + rozet
 
 ## Faz 8 — Canlıya çıkış ⏳ (gerçek kullanıcıya açılış)
 - Yasal sayfalar: kullanım şartları, KVKK, çerezler, telif bildirimi (hukukçu kontrolü)
