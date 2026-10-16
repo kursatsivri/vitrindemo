@@ -1,11 +1,7 @@
-export function avatarUrl(path: string | null) {
-  return path
-    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${path}`
-    : null;
-}
+import { storageUrl } from "@/lib/tracks";
 
 export function Avatar({ path, name, size = 96 }: { path: string | null; name: string; size?: number }) {
-  const url = avatarUrl(path);
+  const url = path ? storageUrl("avatars", path) : null;
   const style = { width: size, height: size };
 
   if (!url) {

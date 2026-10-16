@@ -15,7 +15,7 @@ export function weekStart(now = new Date()) {
   return new Date(tr.getTime() - 3 * 3600_000);
 }
 
-export function storageUrl(bucket: "tracks" | "covers", path: string) {
+export function storageUrl(bucket: "tracks" | "covers" | "avatars", path: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
 }
 

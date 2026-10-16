@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar } from "@/app/components/avatar";
+import { TrackRow } from "@/app/components/track-row";
 import { GENRES, ROLE_LABELS, SOCIALS } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,6 +23,16 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
   const name = profile.display_name || profile.username;
   const socials = (profile.socials ?? {}) as Record<string, string>;
   const isOwner = claims?.claims.sub === profile.id;
+  const isArtist = profile.role === "artist";
+
+  // Gizlenen parçaları RLS sadece sahibine döndürür.
+  const { data: tracks } = isArtist
+    ? await supabase
+        .from("tracks")
+        .select("id, title, genre, cover_path, duration_sec, status")
+        .eq("artist_id", profile.id)
+        .order("created_at", { ascending: false })
+    : { data: [] };
 
   return (
     <article className="flex flex-col gap-6">
@@ -66,6 +77,27 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
         <Link href="/profil/duzenle" className="btn-secondary w-fit self-center sm:self-start">
           Profili düzenle
         </Link>
+      )}
+
+      {isArtist && (
+        <section className="flex flex-col gap-2">
+          <h2 className="font-display text-xl font-semibold">Parçalar</h2>
+          {tracks && tracks.length > 0 ? (
+            <ul className="divide-y divide-border">
+              {tracks.map((t) => (
+                <TrackRow key={t.id} track={t} isOwner={isOwner} />
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted">
+              {isOwner ? (
+                <>Henüz parça yüklemedin. <Link href="/yukle" className="link">İlk parçanı yükle</Link></>
+              ) : (
+                "Henüz parça yok."
+              )}
+            </p>
+          )}
+        </section>
       )}
     </article>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Field } from "@/app/components/field";
+import { GenrePills } from "@/app/components/genre-pills";
 import { Notice } from "@/app/components/notice";
 import { createClient } from "@/lib/supabase/client";
 import { AUDIO_MAX_BYTES, AUDIO_TYPES, COVER_MAX_BYTES, COVER_TYPES } from "@/lib/tracks";
@@ -133,21 +134,7 @@ export function UploadForm({ userId }: { userId: string }) {
 
       <Field label="Başlık" name="title" required maxLength={80} disabled={busy} />
 
-      <fieldset className="flex gap-2 text-sm" disabled={busy}>
-        <legend className="mb-1.5 font-medium text-muted">Tür</legend>
-        {[
-          { value: "rap", label: "Rap" },
-          { value: "beat", label: "Beat" },
-        ].map((g) => (
-          <label
-            key={g.value}
-            className="cursor-pointer rounded-full border border-border bg-surface-2 px-4 py-1.5 font-medium transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/10 has-[:checked]:text-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
-          >
-            <input type="radio" name="genre" value={g.value} required className="sr-only" />
-            {g.label}
-          </label>
-        ))}
-      </fieldset>
+      <GenrePills type="radio" disabled={busy} />
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-muted">Açıklama (opsiyonel)</span>

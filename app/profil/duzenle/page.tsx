@@ -3,10 +3,11 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ActionForm } from "@/app/components/action-form";
 import { Field } from "@/app/components/field";
-import { GENRES, SOCIALS } from "@/lib/profile";
+import { ImageInput } from "@/app/components/image-input";
+import { GenrePills } from "@/app/components/genre-pills";
+import { SOCIALS } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { updateProfile } from "./actions";
-import { AvatarInput } from "./avatar-input";
 
 export const metadata = { title: "Profili düzenle — Vitrin" };
 
@@ -31,10 +32,15 @@ async function EditForm() {
   return (
     <>
       <ActionForm action={updateProfile} submitLabel="Kaydet">
-        <AvatarInput
+        <ImageInput
+          bucket="avatars"
           userId={user.id}
           initialPath={profile.avatar_path}
-          name={profile.display_name || profile.username}
+          fieldName="avatar_path"
+          maxMb={2}
+          round
+          placeholder={(profile.display_name || profile.username).charAt(0)}
+          alt={profile.display_name || profile.username}
         />
         <Field
           label="Kullanıcı adı"
@@ -54,24 +60,7 @@ async function EditForm() {
 
         {isArtist && (
           <>
-            <fieldset className="flex gap-2 text-sm">
-              <legend className="mb-1.5 font-medium text-muted">Tür</legend>
-              {GENRES.map((g) => (
-                <label
-                  key={g.value}
-                  className="cursor-pointer rounded-full border border-border bg-surface-2 px-4 py-1.5 font-medium transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/10 has-[:checked]:text-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
-                >
-                  <input
-                    type="checkbox"
-                    name="genres"
-                    value={g.value}
-                    defaultChecked={profile.genres.includes(g.value)}
-                    className="sr-only"
-                  />
-                  {g.label}
-                </label>
-              ))}
-            </fieldset>
+            <GenrePills type="checkbox" defaultValues={profile.genres} />
             {SOCIALS.map((s) => (
               <Field
                 key={s.key}
