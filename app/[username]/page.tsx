@@ -29,7 +29,7 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
   const { data: tracks } = isArtist
     ? await supabase
         .from("tracks")
-        .select("id, title, genre, cover_path, duration_sec, status")
+        .select("id, title, genre, audio_path, cover_path, duration_sec, status")
         .eq("artist_id", profile.id)
         .order("created_at", { ascending: false })
     : { data: [] };
@@ -85,7 +85,7 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
           {tracks && tracks.length > 0 ? (
             <ul className="divide-y divide-border">
               {tracks.map((t) => (
-                <TrackRow key={t.id} track={t} isOwner={isOwner} />
+                <TrackRow key={t.id} track={t} artist={{ name, username: profile.username }} isOwner={isOwner} />
               ))}
             </ul>
           ) : (

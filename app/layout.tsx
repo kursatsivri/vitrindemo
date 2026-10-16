@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import { Header } from "./components/header";
+import { PlayerProvider } from "./components/player";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,8 +32,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Header />
-        {children}
+        {/* Oynatıcı layout'ta: sayfa değişince müzik durmaz (SPEC §3.3) */}
+        <PlayerProvider>
+          <Header />
+          {children}
+        </PlayerProvider>
       </body>
     </html>
   );
