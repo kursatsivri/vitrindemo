@@ -11,18 +11,18 @@ export default function Page() {
     <AuthCard title="Kayıt ol">
       <ActionForm action={signUp} submitLabel="Kayıt ol">
         <fieldset className="grid grid-cols-2 gap-2">
-          <legend className="mb-1 text-sm text-neutral-300">Hesap türü</legend>
+          <legend className="mb-1.5 text-sm font-medium text-muted">Hesap türü</legend>
           {[
             { value: "listener", label: "Dinleyici", hint: "Dinle, oy ver" },
             { value: "artist", label: "Sanatçı", hint: "Parça yükle" },
           ].map((r) => (
             <label
               key={r.value}
-              className="flex cursor-pointer flex-col rounded-md border border-neutral-700 p-3 has-[:checked]:border-white"
+              className="flex cursor-pointer flex-col rounded-xl border border-border bg-surface-2 p-3 transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/10 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
             >
               <input type="radio" name="role" value={r.value} required className="sr-only" />
-              <span className="font-medium">{r.label}</span>
-              <span className="text-xs text-neutral-400">{r.hint}</span>
+              <span className="font-semibold">{r.label}</span>
+              <span className="text-xs text-muted">{r.hint}</span>
             </label>
           ))}
         </fieldset>
@@ -48,8 +48,9 @@ export default function Page() {
           hint="En az 8 karakter"
         />
       </ActionForm>
-      <p className="text-sm text-neutral-400">
-        Hesabın var mı? <Link href="/giris" className="text-white underline">Giriş yap</Link>
+      <p className="text-sm text-muted">
+        Hesabın var mı?{" "}
+        <Link href="/giris" className="font-semibold text-accent hover:text-accent-hover">Giriş yap</Link>
       </p>
     </AuthCard>
   );

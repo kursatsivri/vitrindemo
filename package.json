@@ -8,8 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run build",
-    "test:db": "supabase db query --linked -f supabase/tests/profiles_security.sql"
+    "test": "node --no-warnings --test lib/*.test.ts",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "test:db": "scripts/test-db.sh --linked"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
