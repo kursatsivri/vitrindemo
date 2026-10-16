@@ -20,12 +20,14 @@ const PlayerContext = createContext<Player | null>(null);
 
 // Dinleme kaydı (SPEC §3.3): parça başlayınca start_play, gerçekten dinlenen süre 30 sn'yi
 // geçince count_play. 30 sn kuralını sunucu da kendi saatiyle kontrol eder; istek gecikmesi
-// payı için 35. saniyede sorar, olmazsa 15 sn sonra tekrar dener.
+// payı için 35. saniyede sorar, olmazsa 15 sn sonra tekrar dener (en fazla 3 kez; parça bugün
+// zaten sayıldıysa sunucu her seferinde "hayır" der).
 const FIRST_CHECK_SEC = 35;
 const RETRY_SEC = 15;
+const MAX_CHECKS = 3;
 
 function newListen(trackId: string) {
-  return { trackId, loggedIn: false, playing: false, started: false, counted: false, sec: 0, last: 0, nextCheck: FIRST_CHECK_SEC };
+  return { trackId, loggedIn: false, playing: false, started: false, done: false, checks: 0, sec: 0, last: 0, nextCheck: FIRST_CHECK_SEC };
 }
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
@@ -84,13 +86,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (!a.paused && delta > 0 && delta < 2) l.sec += delta;
     l.last = a.currentTime;
 
-    if (l.started && !l.counted && l.sec >= l.nextCheck) {
-      l.counted = true;
+    if (l.started && !l.done && l.sec >= l.nextCheck) {
+      l.done = true;
+      l.checks += 1;
       createClient()
         .rpc("count_play", { p_track: l.trackId })
         .then(({ data }) => {
-          if (!data) {
-            l.counted = false;
+          if (!data && l.checks < MAX_CHECKS) {
+            l.done = false;
             l.nextCheck = l.sec + RETRY_SEC;
           }
         });
