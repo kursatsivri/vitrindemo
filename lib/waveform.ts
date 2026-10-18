@@ -1,14 +1,15 @@
 export const WAVEFORM_POINTS = 120;
 
-// Ses örneklerini n parçaya böler, her parçanın tepe değerini 0–100'e ölçekler (en yüksek = 100).
+// Ses örneklerini n parçaya böler, her parçanın ortalama gücünü (RMS) 0–100'e ölçekler (en güçlü = 100).
+// Tepe değeri yerine RMS: yüksek seviyede mikslenmiş parçalarda tepe her yerde tavana vurup dalgayı düzleştirir.
 export function peaks(samples: Float32Array, n = WAVEFORM_POINTS): number[] {
   const size = Math.floor(samples.length / n);
   if (size < 1) return [];
   const raw: number[] = [];
   for (let i = 0; i < n; i++) {
-    let max = 0;
-    for (let j = i * size; j < (i + 1) * size; j++) max = Math.max(max, Math.abs(samples[j]));
-    raw.push(max);
+    let sum = 0;
+    for (let j = i * size; j < (i + 1) * size; j++) sum += samples[j] * samples[j];
+    raw.push(Math.sqrt(sum / size));
   }
   const top = Math.max(...raw) || 1;
   return raw.map((v) => Math.round((v / top) * 100));
