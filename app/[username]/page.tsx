@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar } from "@/app/components/avatar";
-import { TrackRow } from "@/app/components/track-row";
+import { TrackQueue } from "@/app/components/player";
+import { toPlayerTrack, TrackRow } from "@/app/components/track-row";
 import { cityName, GENRES } from "@/lib/music";
 import { ROLE_LABELS, SOCIALS } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
@@ -98,6 +99,7 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
         <section className="flex flex-col gap-2">
           <h2 className="font-display text-xl font-semibold">Parçalar</h2>
           {ordered.length > 0 ? (
+            <TrackQueue tracks={ordered.map((t) => toPlayerTrack(t, { name, username: profile.username }))}>
             <ul className="divide-y divide-border">
               {ordered.map((t) => (
                 <TrackRow
@@ -109,6 +111,7 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
                 />
               ))}
             </ul>
+            </TrackQueue>
           ) : (
             <p className="text-muted">
               {isOwner ? (

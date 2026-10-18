@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { TrackRow } from "@/app/components/track-row";
+import { TrackQueue } from "@/app/components/player";
+import { toPlayerTrack, TrackRow } from "@/app/components/track-row";
 import { GENRES } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
 
@@ -23,6 +24,9 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchPara
   // Hata "parça yok" gibi görünmesin
   if (error) throw new Error(`Akış yüklenemedi: ${error.message}`);
 
+  const rows = (tracks ?? []).flatMap((t) =>
+    t.profiles ? [{ track: t, artist: { name: t.profiles.display_name || t.profiles.username, username: t.profiles.username } }] : [],
+  );
   const filters = [{ value: null, label: "Hepsi" }, ...GENRES];
   return (
     <>
@@ -38,19 +42,14 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchPara
           </Link>
         ))}
       </nav>
-      {tracks && tracks.length > 0 ? (
-        <ul className="divide-y divide-border">
-          {tracks.map((t) =>
-            t.profiles ? (
-              <TrackRow
-                key={t.id}
-                track={t}
-                artist={{ name: t.profiles.display_name || t.profiles.username, username: t.profiles.username }}
-                showArtist
-              />
-            ) : null,
-          )}
-        </ul>
+      {rows.length > 0 ? (
+        <TrackQueue tracks={rows.map((r) => toPlayerTrack(r.track, r.artist))}>
+          <ul className="divide-y divide-border">
+            {rows.map((r) => (
+              <TrackRow key={r.track.id} track={r.track} artist={r.artist} showArtist />
+            ))}
+          </ul>
+        </TrackQueue>
       ) : (
         <p className="py-8 text-muted">Henüz parça yok. İlk yükleyen sen ol.</p>
       )}
