@@ -58,6 +58,5 @@ export async function createTrack(formData: FormData): Promise<FormState> {
   // Parça kaydedildi; feat'ler başarısız olursa parça kalır, sanatçı düzenlemeden ekleyebilir.
   await syncFeatures(supabase, track.id, feats.ids);
 
-  const { data: profile } = await supabase.from("profiles").select("username").eq("id", user.id).single();
-  redirect(profile ? `/${profile.username}` : "/");
+  redirect(`/p/${track.id}`);
 }

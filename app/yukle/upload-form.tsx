@@ -101,7 +101,7 @@ export function UploadForm({ userId }: { userId: string }) {
     form.set("duration_sec", String(duration ?? ""));
     if (waveform) form.set("waveform", JSON.stringify(waveform));
 
-    // Başarılıysa createTrack profile yönlendirir; buraya sadece hata döner.
+    // Başarılıysa createTrack parça sayfasına yönlendirir; buraya sadece hata döner.
     const result = await createTrack(form);
     if (result?.error) {
       await storage.from("tracks").remove([audioPath]);
