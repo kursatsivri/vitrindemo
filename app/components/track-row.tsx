@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Cover } from "@/app/components/cover";
-import { PlayButton, type PlayerTrack } from "@/app/components/player";
+import { PlayButton, type PlayerTrack, TrackQueue } from "@/app/components/player";
 import { GENRES } from "@/lib/music";
 import { formatDuration } from "@/lib/tracks";
 
@@ -76,5 +76,30 @@ export function TrackRow({
         </Link>
       )}
     </li>
+  );
+}
+
+export type TrackListRow = { track: TrackRowData; artist: { name: string; username: string } };
+
+// Sanatçı adıyla parça listesi + oynatıcı sırası (akış, kaydedilenler).
+export function TrackList({ rows, empty }: { rows: TrackListRow[]; empty: React.ReactNode }) {
+  if (rows.length === 0) return <div className="py-8 text-muted">{empty}</div>;
+  return (
+    <TrackQueue tracks={rows.map((r) => toPlayerTrack(r.track, r.artist))}>
+      <ul className="divide-y divide-border">
+        {rows.map((r) => (
+          <TrackRow key={r.track.id} track={r.track} artist={r.artist} showArtist />
+        ))}
+      </ul>
+    </TrackQueue>
+  );
+}
+
+// Sorgudan gelen gömülü sanatçıyı listeye uygun hale getirir.
+export function withArtist<T extends TrackRowData & { profiles: { username: string; display_name: string | null } | null }>(
+  tracks: T[],
+): TrackListRow[] {
+  return tracks.flatMap((t) =>
+    t.profiles ? [{ track: t, artist: { name: t.profiles.display_name || t.profiles.username, username: t.profiles.username } }] : [],
   );
 }

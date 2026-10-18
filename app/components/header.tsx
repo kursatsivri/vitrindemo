@@ -28,6 +28,7 @@ async function UserNav() {
       {profile?.role === "artist" && (
         <Link href="/yukle" className="btn-primary py-2">+ Yükle</Link>
       )}
+      <Link href="/profil/kaydedilenler" className="hidden text-muted hover:text-foreground sm:inline">Kaydedilenler</Link>
       <form action={signOut}>
         <button type="submit" className="text-muted hover:text-foreground">Çıkış</button>
       </form>
