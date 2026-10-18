@@ -118,6 +118,7 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 
 ## 🎨 Tasarım (fazlardan bağımsız)
 - Koyu tema, premium/sade, turuncu vurgu, şimdilik yazı logo
+- **Demo tasarım uygulandı (18 Ekim 2026):** renkler/fontlar `app/globals.css` + `app/layout.tsx`'te token olarak; ana sayfa, profil, formlar, oynatıcı, 404, boş durumlar, skeleton. Taslak: [Claude Design kanvası](https://claude.ai/artifact/BhE5iWQa1idqp3DpHD4Chn). İleride rötuşlanacak.
 - **Senin göndereceğin tasarım** gelince tüm ekranlar ona göre giydirilir
 - Tasarlanması gereken ekranlar: ana sayfa, **keşfet modu (kaydırma kartı)**, alt oynatıcı, parça sayfası, sıralama sayfası, profil, keşifçi ekranları, bildirimler, formlar, boş durumlar — masaüstü ve telefon
 
