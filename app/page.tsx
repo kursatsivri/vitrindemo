@@ -26,13 +26,13 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchPara
   const filters = [{ value: null, label: "Hepsi" }, ...GENRES];
   return (
     <>
-      <nav className="flex gap-2 text-sm" aria-label="Tür filtresi">
+      <nav className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 text-sm [scrollbar-width:none]" aria-label="Tür filtresi">
         {filters.map((f) => (
           <Link
             key={f.label}
             href={f.value ? `/?tur=${f.value}` : "/"}
             aria-current={genre === f.value ? "page" : undefined}
-            className="rounded-full border border-border bg-surface-2 px-4 py-1.5 font-medium transition-colors aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background"
+            className="shrink-0 whitespace-nowrap rounded-full border border-border bg-surface-2 px-4 py-1.5 font-medium transition-colors aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background"
           >
             {f.label}
           </Link>
@@ -65,7 +65,7 @@ export default function Home({ searchParams }: PageProps<"/">) {
         <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl">
           Yeni sesler<span className="text-accent">.</span>
         </h1>
-        <p className="text-muted">Bağımsız rap ve beat&apos;ler. En yeniler en üstte.</p>
+        <p className="text-muted">Keşfedilmeyi bekleyen bağımsız müzisyenler. En yeniler en üstte.</p>
       </header>
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-xl font-semibold">Yeni yüklenenler</h2>

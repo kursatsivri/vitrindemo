@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { Field } from "@/app/components/field";
-import { GenrePills } from "@/app/components/genre-pills";
+import { TrackMetaFields } from "@/app/components/track-meta-fields";
 import { Notice } from "@/app/components/notice";
 import { createClient } from "@/lib/supabase/client";
 import { AUDIO_MAX_BYTES, AUDIO_TYPES, COVER_MAX_BYTES, COVER_TYPES } from "@/lib/tracks";
+import { fileWaveform } from "@/lib/waveform";
 import { createTrack } from "./actions";
 
 function audioDuration(file: File) {
@@ -25,6 +26,7 @@ function audioDuration(file: File) {
 // ardından createTrack kaydı açar. Kayıt başarısız olursa yüklenen dosyalar geri silinir.
 export function UploadForm({ userId }: { userId: string }) {
   const [audio, setAudio] = useState<File | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -41,7 +43,9 @@ export function UploadForm({ userId }: { userId: string }) {
       e.target.value = "";
       return setError("Ses dosyası en fazla 15 MB olabilir.");
     }
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
     setAudio(file);
+    setAudioUrl(file ? URL.createObjectURL(file) : null);
   }
 
   function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
@@ -67,6 +71,9 @@ export function UploadForm({ userId }: { userId: string }) {
     const storage = createClient().storage;
     setError("");
 
+    setStatus("Ses analiz ediliyor…");
+    const [duration, waveform] = await Promise.all([audioDuration(audio), fileWaveform(audio)]);
+
     setStatus("Ses dosyası yükleniyor…");
     const audioPath = `${userId}/${crypto.randomUUID()}.mp3`;
     const up = await storage.from("tracks").upload(audioPath, audio, { contentType: "audio/mpeg" });
@@ -91,7 +98,8 @@ export function UploadForm({ userId }: { userId: string }) {
     setStatus("Kaydediliyor…");
     form.set("audio_path", audioPath);
     if (coverPath) form.set("cover_path", coverPath);
-    form.set("duration_sec", String((await audioDuration(audio)) ?? ""));
+    form.set("duration_sec", String(duration ?? ""));
+    if (waveform) form.set("waveform", JSON.stringify(waveform));
 
     // Başarılıysa createTrack profile yönlendirir; buraya sadece hata döner.
     const result = await createTrack(form);
@@ -134,12 +142,13 @@ export function UploadForm({ userId }: { userId: string }) {
 
       <Field label="Başlık" name="title" required maxLength={80} disabled={busy} />
 
-      <GenrePills type="radio" disabled={busy} />
-
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium text-muted">Açıklama (opsiyonel)</span>
-        <textarea name="description" maxLength={500} rows={3} disabled={busy} className="input" />
-      </label>
+      <fieldset disabled={busy} className="flex flex-col gap-5">
+        <TrackMetaFields previewSrc={audioUrl} />
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-muted">Açıklama (opsiyonel)</span>
+          <textarea name="description" maxLength={500} rows={3} className="input" />
+        </label>
+      </fieldset>
 
       <label className="flex items-start gap-3 rounded-xl bg-surface-2 p-3.5 text-sm">
         <input type="checkbox" name="rights" required disabled={busy} className="mt-0.5 size-4 accent-accent" />
