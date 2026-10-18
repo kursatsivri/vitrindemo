@@ -51,23 +51,23 @@ export function RatingPanel({
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-display text-xl font-semibold">Geri bildirim</h2>
+      <h2 className="font-display text-2xl font-bold tracking-[-0.03em]">Geri bildirim</h2>
 
       {summary.n >= 5 ? (
         <ul className="grid gap-2 sm:grid-cols-2">
           {criteria.map((c, i) => (
             <li key={c} className="flex items-center gap-3 text-sm">
-              <span className="w-28 shrink-0 text-muted">{c}</span>
+              <span className="w-28 shrink-0 text-text-muted">{c}</span>
               <span className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
                 <span className="block h-full bg-accent" style={{ width: `${((summary.avgs[i] ?? 0) / 5) * 100}%` }} />
               </span>
-              <span className="w-8 text-right font-semibold tabular-nums">{summary.avgs[i]?.toFixed(1)}</span>
+              <span className="w-8 text-right font-medium tabular-nums">{summary.avgs[i]?.toFixed(1)}</span>
             </li>
           ))}
-          <li className="text-xs text-subtle sm:col-span-2">{summary.n} puanlama</li>
+          <li className="text-xs text-text-muted sm:col-span-2">{summary.n} puanlama</li>
         </ul>
       ) : (
-        <p className="text-sm text-muted">
+        <p className="text-sm text-text-muted">
           {summary.n > 0 ? `${summary.n} puanlama. ` : ""}Ortalamalar en az 5 puanlamadan sonra görünür.
         </p>
       )}
@@ -75,10 +75,10 @@ export function RatingPanel({
       {viewerId && !isOwner && (
         canRate || listenedHere ? (
           <div className="card flex flex-col gap-3 p-4">
-            <p className="text-sm font-semibold">{mine ? "Puanını güncelle" : "Sen de puan ver"}</p>
+            <p className="text-sm font-medium">{mine ? "Puanını güncelle" : "Sen de puan ver"}</p>
             {criteria.map((c, i) => (
               <div key={c} className="flex items-center gap-3 text-sm" role="radiogroup" aria-label={c}>
-                <span className="w-28 shrink-0 text-muted">{c}</span>
+                <span className="w-28 shrink-0 text-text-muted">{c}</span>
                 <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((v) => (
                     <button
@@ -88,8 +88,8 @@ export function RatingPanel({
                       aria-checked={scores[i] === v}
                       aria-label={`${c}: ${v}`}
                       onClick={() => setScores(scores.map((s, j) => (j === i ? v : s)))}
-                      className={`size-8 rounded-full border text-xs font-semibold transition-colors ${
-                        scores[i] >= v ? "border-accent bg-accent text-black" : "border-border bg-surface-2 text-muted hover:border-subtle"
+                      className={`size-8 rounded-full border text-xs font-medium transition-colors ${
+                        scores[i] >= v ? "border-accent bg-accent text-bg" : "border-border bg-surface-2 text-text-muted hover:border-text-muted/50"
                       }`}
                     >
                       {v}
@@ -104,7 +104,7 @@ export function RatingPanel({
             {status && <Notice tone={status.tone}>{status.text}</Notice>}
           </div>
         ) : (
-          <p className="text-sm text-subtle">Puan vermek için parçayı en az 30 saniye dinle.</p>
+          <p className="text-sm text-text-muted">Puan vermek için parçayı en az 30 saniye dinle.</p>
         )
       )}
     </section>
