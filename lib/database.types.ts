@@ -80,10 +80,13 @@ export type Database = {
         Row: {
           avatar_path: string | null
           bio: string | null
+          city: number | null
           created_at: string
           display_name: string | null
+          featured_track_id: string | null
           genres: string[]
           id: string
+          open_to_discovery: boolean
           role: string
           socials: Json
           username: string
@@ -91,10 +94,13 @@ export type Database = {
         Insert: {
           avatar_path?: string | null
           bio?: string | null
+          city?: number | null
           created_at?: string
           display_name?: string | null
+          featured_track_id?: string | null
           genres?: string[]
           id: string
+          open_to_discovery?: boolean
           role: string
           socials?: Json
           username: string
@@ -102,15 +108,56 @@ export type Database = {
         Update: {
           avatar_path?: string | null
           bio?: string | null
+          city?: number | null
           created_at?: string
           display_name?: string | null
+          featured_track_id?: string | null
           genres?: string[]
           id?: string
+          open_to_discovery?: boolean
           role?: string
           socials?: Json
           username?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_featured_track_id_fkey"
+            columns: ["featured_track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      track_features: {
+        Row: {
+          artist_id: string
+          track_id: string
+        }
+        Insert: {
+          artist_id: string
+          track_id: string
+        }
+        Update: {
+          artist_id?: string
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_features_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "track_features_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tracks: {
         Row: {
@@ -121,10 +168,16 @@ export type Database = {
           description: string | null
           duration_sec: number | null
           genre: string
+          hook_sec: number
           id: string
+          links: Json
+          moods: string[]
           rights_confirmed: boolean
+          seeking_vocal: boolean
           status: string
+          tags: string[]
           title: string
+          waveform: number[] | null
         }
         Insert: {
           artist_id: string
@@ -134,10 +187,16 @@ export type Database = {
           description?: string | null
           duration_sec?: number | null
           genre: string
+          hook_sec?: number
           id?: string
+          links?: Json
+          moods?: string[]
           rights_confirmed: boolean
+          seeking_vocal?: boolean
           status?: string
+          tags?: string[]
           title: string
+          waveform?: number[] | null
         }
         Update: {
           artist_id?: string
@@ -147,10 +206,16 @@ export type Database = {
           description?: string | null
           duration_sec?: number | null
           genre?: string
+          hook_sec?: number
           id?: string
+          links?: Json
+          moods?: string[]
           rights_confirmed?: boolean
+          seeking_vocal?: boolean
           status?: string
+          tags?: string[]
           title?: string
+          waveform?: number[] | null
         }
         Relationships: [
           {

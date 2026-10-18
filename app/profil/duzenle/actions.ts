@@ -2,7 +2,9 @@
 
 import { redirect } from "next/navigation";
 import type { FormState } from "@/app/components/action-form";
-import { GENRES, SOCIALS, USERNAME_RE } from "@/lib/profile";
+import { GENRES } from "@/lib/music";
+import { readLinks } from "@/lib/links";
+import { SOCIALS, USERNAME_RE } from "@/lib/profile";
 import type { TablesUpdate } from "@/lib/database.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,34 +34,26 @@ export async function updateProfile(_: FormState, formData: FormData): Promise<F
   const avatarPath = text(formData, "avatar_path", 200);
   if (avatarPath && !avatarPath.startsWith(`${user.id}/`)) return { error: "Geçersiz profil fotoğrafı." };
 
+  const city = Number(formData.get("city"));
   const update: TablesUpdate<"profiles"> = {
     username,
     display_name: text(formData, "display_name", 50),
     bio: text(formData, "bio", 300),
     avatar_path: avatarPath,
+    city: Number.isInteger(city) && city >= 1 && city <= 81 ? city : null,
   };
 
   if (isArtist) {
     const genres = formData.getAll("genres").map(String);
     update.genres = GENRES.map((g) => g.value).filter((g) => genres.includes(g));
 
-    const socials: Record<string, string> = {};
-    for (const s of SOCIALS) {
-      const value = text(formData, s.key, 300);
-      if (!value) continue;
-      let url: URL;
-      try {
-        url = new URL(value);
-      } catch {
-        return { error: `${s.label} linki geçersiz.` };
-      }
-      const hostOk = s.hosts.some((h) => url.hostname === h || url.hostname.endsWith(`.${h}`));
-      if (url.protocol !== "https:" || !hostOk) {
-        return { error: `${s.label} linki https://${s.hosts[0]}/… ile başlamalı.` };
-      }
-      socials[s.key] = url.toString();
-    }
-    update.socials = socials;
+    const socials = readLinks(formData, SOCIALS);
+    if ("error" in socials) return socials;
+    update.socials = socials.links;
+
+    update.open_to_discovery = formData.get("open_to_discovery") === "on";
+    // Sadece kendi parçası olabilir; DB politikası da kontrol eder.
+    update.featured_track_id = text(formData, "featured_track_id", 36);
   }
 
   const { error } = await supabase.from("profiles").update(update).eq("id", user.id);

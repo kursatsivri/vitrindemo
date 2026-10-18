@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { TrackRow } from "@/app/components/track-row";
-import { GENRES } from "@/lib/profile";
+import { GENRES } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
 
 const FEED_LIMIT = 50;

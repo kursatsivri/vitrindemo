@@ -8,11 +8,6 @@ export const ROLE_LABELS: Record<string, string> = {
   admin: "Yönetici",
 };
 
-export const GENRES = [
-  { value: "rap", label: "Rap" },
-  { value: "beat", label: "Beat" },
-] as const;
-
 export const SOCIALS = [
   { key: "instagram", label: "Instagram", hosts: ["instagram.com"] },
   { key: "youtube", label: "YouTube", hosts: ["youtube.com", "youtu.be"] },

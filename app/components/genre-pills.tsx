@@ -1,4 +1,4 @@
-import { GENRES } from "@/lib/profile";
+import { GENRES } from "@/lib/music";
 
 // Rap/Beat seçimi: parça için tek (radio), profil için çoklu (checkbox).
 export function GenrePills({

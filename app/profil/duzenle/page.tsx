@@ -5,6 +5,7 @@ import { ActionForm } from "@/app/components/action-form";
 import { Field } from "@/app/components/field";
 import { ImageInput } from "@/app/components/image-input";
 import { GenrePills } from "@/app/components/genre-pills";
+import { CITIES } from "@/lib/music";
 import { SOCIALS } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { updateProfile } from "./actions";
@@ -16,13 +17,14 @@ async function EditForm() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/giris");
 
-  const [{ data: profile }, { data: contact }] = await Promise.all([
+  const [{ data: profile }, { data: contact }, { data: tracks }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("role, username, display_name, bio, genres, socials, avatar_path")
+      .select("role, username, display_name, bio, genres, socials, avatar_path, city, open_to_discovery, featured_track_id")
       .eq("id", user.id)
       .single(),
     supabase.from("artist_contacts").select("email").eq("profile_id", user.id).maybeSingle(),
+    supabase.from("tracks").select("id, title").eq("artist_id", user.id).order("created_at", { ascending: false }),
   ]);
   if (!profile) redirect("/giris");
 
@@ -57,10 +59,43 @@ async function EditForm() {
           <span className="font-medium text-muted">Kısa biyografi</span>
           <textarea name="bio" defaultValue={profile.bio ?? ""} maxLength={300} rows={4} className="input" />
         </label>
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-muted">Şehir</span>
+          <select name="city" defaultValue={profile.city ?? ""} className="input">
+            <option value="">Seçilmedi</option>
+            {CITIES.map((c, i) => (
+              <option key={c} value={i + 1}>{c}</option>
+            ))}
+          </select>
+        </label>
 
         {isArtist && (
           <>
             <GenrePills type="checkbox" defaultValues={profile.genres} />
+            {tracks && tracks.length > 0 && (
+              <label className="flex flex-col gap-1.5 text-sm">
+                <span className="font-medium text-muted">Öne çıkan parça</span>
+                <select name="featured_track_id" defaultValue={profile.featured_track_id ?? ""} className="input">
+                  <option value="">Yok</option>
+                  {tracks.map((t) => (
+                    <option key={t.id} value={t.id}>{t.title}</option>
+                  ))}
+                </select>
+                <span className="text-xs text-subtle">Profilinin en üstünde gösterilir.</span>
+              </label>
+            )}
+            <label className="flex items-start gap-3 rounded-xl bg-surface-2 p-3.5 text-sm">
+              <input
+                type="checkbox"
+                name="open_to_discovery"
+                defaultChecked={profile.open_to_discovery}
+                className="mt-0.5 size-4 accent-accent"
+              />
+              <span>
+                <span className="font-semibold">Keşfedilmeye açığım</span>
+                <span className="block text-xs text-muted">Yapımcı ve plak şirketlerinden teklif almak istiyorum.</span>
+              </span>
+            </label>
             {SOCIALS.map((s) => (
               <Field
                 key={s.key}
@@ -76,7 +111,7 @@ async function EditForm() {
               name="contact_email"
               type="email"
               defaultValue={contact?.email ?? ""}
-              hint="Sadece onaylı plak şirketleri görebilir."
+              hint="Sadece eşleştiğin onaylı keşifçiler görebilir."
             />
           </>
         )}

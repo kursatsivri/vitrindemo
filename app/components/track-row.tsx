@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Cover } from "@/app/components/cover";
 import { PlayButton } from "@/app/components/player";
-import { GENRES } from "@/lib/profile";
+import { GENRES } from "@/lib/music";
 import { formatDuration } from "@/lib/tracks";
 
 export type TrackRowData = {
@@ -22,11 +22,13 @@ export function TrackRow({
   artist,
   showArtist = false,
   isOwner = false,
+  featured = false,
 }: {
   track: TrackRowData;
   artist: { name: string; username: string };
   showArtist?: boolean;
   isOwner?: boolean;
+  featured?: boolean;
 }) {
   const genre = GENRES.find((g) => g.value === track.genre)?.label ?? track.genre;
   return (
@@ -43,7 +45,10 @@ export function TrackRow({
       />
       <Cover path={track.cover_path} title={track.title} className="w-14" />
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold">{track.title}</p>
+        <p className="truncate font-semibold">
+          {featured && <span className="mr-2 text-xs font-semibold uppercase tracking-wider text-accent">Öne çıkan</span>}
+          {track.title}
+        </p>
         <p className="truncate text-sm text-muted">
           {showArtist && (
             <>
