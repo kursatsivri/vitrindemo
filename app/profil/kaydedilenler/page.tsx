@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { TrackList, withArtist } from "@/app/components/track-row";
+import { ListSkeleton, TrackList, withArtist } from "@/app/components/track-row";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Kaydedilenler — Vitrin" };
@@ -24,9 +24,9 @@ async function Saved() {
 
 export default function Page() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-10">
-      <h1 className="font-display text-4xl font-bold tracking-tight">Kaydedilenler</h1>
-      <Suspense fallback={<p className="text-muted">Yükleniyor…</p>}>
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-7 md:gap-8 md:py-14">
+      <h1 className="font-display text-4xl leading-none font-extrabold tracking-[-0.04em] md:text-5xl">Kaydedilenler</h1>
+      <Suspense fallback={<ListSkeleton />}>
         <Saved />
       </Suspense>
     </main>
