@@ -40,7 +40,7 @@ begin
     format('update public.profiles set username = %L where id = %L', 'a..b', a),
     format('update public.profiles set socials = %L where id = %L', '{"instagram":"javascript:alert(1)"}', a),
     format('update public.profiles set socials = %L where id = %L', '{"tiktok":"https://tiktok.com/x"}', a),
-    format('update public.profiles set genres = %L where id = %L', '{rap,pop}', a),
+    format('update public.profiles set genres = %L where id = %L', '{rap,jazz}', a),
     format('update public.profiles set avatar_path = %L where id = %L', b || '/x.png', a),
     format('insert into public.profiles (id, role, username) values (%L, %L, %L)', gen_random_uuid(), 'admin', 'test_x'),
     format('insert into public.artist_contacts (profile_id, email) values (%L, %L)', b, 'x@test.local'),
