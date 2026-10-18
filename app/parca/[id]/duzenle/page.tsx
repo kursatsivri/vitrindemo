@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ActionForm } from "@/app/components/action-form";
-import { Field } from "@/app/components/field";
+import { Field, FormSkeleton, TextArea } from "@/app/components/field";
 import { TrackMetaFields } from "@/app/components/track-meta-fields";
 import { ImageInput } from "@/app/components/image-input";
 import { createClient } from "@/lib/supabase/server";
@@ -37,7 +37,7 @@ async function EditTrack({ params }: { params: PageProps<"/parca/[id]/duzenle">[
           initialPath={track.cover_path}
           fieldName="cover_path"
           maxMb={3}
-          placeholder="♪"
+          placeholder=""
           alt={track.title}
         />
         <Field label="Başlık" name="title" defaultValue={track.title} required maxLength={80} />
@@ -53,12 +53,9 @@ async function EditTrack({ params }: { params: PageProps<"/parca/[id]/duzenle">[
             feats: track.track_features.flatMap((f) => (f.profiles ? [f.profiles.username] : [])),
           }}
         />
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-muted">Açıklama (opsiyonel)</span>
-          <textarea name="description" defaultValue={track.description ?? ""} maxLength={500} rows={3} className="input" />
-        </label>
+        <TextArea label="Açıklama (opsiyonel)" name="description" defaultValue={track.description ?? ""} maxLength={500} rows={3} />
       </ActionForm>
-      <p className="text-xs text-subtle">Ses dosyası değiştirilemez; farklı bir versiyon için parçayı silip yeniden yükle.</p>
+      <p className="text-center text-xs text-text-muted">Ses dosyası değiştirilemez; farklı bir versiyon için parçayı silip yeniden yükle.</p>
       <DeleteButton id={track.id} />
     </>
   );
@@ -66,9 +63,9 @@ async function EditTrack({ params }: { params: PageProps<"/parca/[id]/duzenle">[
 
 export default function Page({ params }: PageProps<"/parca/[id]/duzenle">) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-10">
-      <h1 className="font-display text-3xl font-bold tracking-tight">Parçayı düzenle</h1>
-      <Suspense fallback={<p className="text-muted">Yükleniyor…</p>}>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-8 px-4 py-7 md:py-14">
+      <h1 className="font-display text-4xl leading-none font-extrabold tracking-[-0.04em] md:text-5xl">Parçayı düzenle</h1>
+      <Suspense fallback={<FormSkeleton fields={5} />}>
         <EditTrack params={params} />
       </Suspense>
     </main>

@@ -87,11 +87,11 @@ export function Comments({
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-semibold">
-          Yorumlar <span className="text-base font-normal text-muted">{comments.length}</span>
+        <h2 className="font-display text-2xl font-bold tracking-[-0.03em]">
+          Yorumlar <span className="text-base font-normal text-text-muted">{comments.length}</span>
         </h2>
         {isOwner && (
-          <button type="button" onClick={toggleEnabled} className="text-sm text-muted hover:text-foreground">
+          <button type="button" onClick={toggleEnabled} className="text-sm text-text-muted hover:text-text">
             {enabled ? "Yorumları kapat" : "Yorumları aç"}
           </button>
         )}
@@ -107,10 +107,10 @@ export function Comments({
               rows={2}
               required
               placeholder="Ne düşünüyorsun?"
-              className="input"
+              className="input h-auto resize-none py-3"
             />
             <div className="flex items-center justify-between gap-3">
-              <label className={`flex items-center gap-2 text-xs ${isCurrent ? "text-muted" : "text-subtle"}`}>
+              <label className={`flex items-center gap-2 text-xs ${isCurrent ? "text-text-muted" : "text-text-muted"}`}>
                 <input
                   type="checkbox"
                   checked={pinTime && isCurrent}
@@ -127,12 +127,12 @@ export function Comments({
             {error && <Notice tone="error">{error}</Notice>}
           </form>
         ) : (
-          <p className="text-sm text-muted">
+          <p className="text-sm text-text-muted">
             Yorum yapmak için <Link href="/giris" className="link">giriş yap</Link>.
           </p>
         )
       ) : (
-        <p className="text-sm text-muted">Sanatçı bu parçada yorumları kapattı.</p>
+        <p className="text-sm text-text-muted">Sanatçı bu parçada yorumları kapattı.</p>
       )}
 
       {comments.length > 0 && (
@@ -144,18 +144,18 @@ export function Comments({
               </Link>
               <div className="min-w-0 flex-1">
                 <p className="text-sm">
-                  <Link href={`/${c.author.username}`} className="font-semibold hover:underline">
+                  <Link href={`/${c.author.username}`} className="font-medium hover:underline">
                     {c.author.display_name || c.author.username}
                   </Link>
-                  {c.authorId === ownerId && <span className="ml-1.5 text-xs font-semibold text-accent">Sanatçı</span>}
-                  <span className="ml-2 text-xs text-subtle">{c.ago}</span>
+                  {c.authorId === ownerId && <span className="ml-1.5 text-xs font-medium text-accent">Sanatçı</span>}
+                  <span className="ml-2 text-xs text-text-muted">{c.ago}</span>
                 </p>
-                <p className="mt-0.5 whitespace-pre-line break-words text-sm text-foreground/90">
+                <p className="mt-0.5 whitespace-pre-line break-words text-sm text-text/90">
                   {c.atSec !== null && (
                     <button
                       type="button"
                       onClick={() => jump(c.atSec!)}
-                      className="mr-1.5 rounded bg-accent/15 px-1.5 py-0.5 text-xs font-semibold text-accent tabular-nums hover:bg-accent/25"
+                      className="mr-1.5 rounded bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-accent tabular-nums hover:brightness-125"
                     >
                       {formatDuration(c.atSec) || "0:00"}
                     </button>
@@ -164,7 +164,7 @@ export function Comments({
                 </p>
               </div>
               {(viewerId === c.authorId || isOwner) && (
-                <button type="button" onClick={() => remove(c.id)} className="self-start text-xs text-subtle hover:text-red-300">
+                <button type="button" onClick={() => remove(c.id)} className="self-start text-xs text-text-muted hover:text-danger">
                   Sil
                 </button>
               )}

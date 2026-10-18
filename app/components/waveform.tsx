@@ -28,12 +28,12 @@ export function Waveform({ track, peaks }: { track: PlayerTrack; peaks: number[]
         bars.map((h, i) => (
           <span
             key={i}
-            className={`flex-1 rounded-full transition-colors ${i / bars.length < progress ? "bg-accent" : "bg-surface-2 group-hover:bg-border"}`}
+            className={`flex-1 rounded-full transition-colors ${i / bars.length < progress ? "bg-accent" : "bg-border group-hover:bg-text-muted/40"}`}
             style={{ height: `${Math.max(6, h)}%` }}
           />
         ))
       ) : (
-        <span className="relative h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+        <span className="relative h-1.5 w-full overflow-hidden rounded-full bg-border">
           <span className="absolute inset-y-0 left-0 bg-accent" style={{ width: `${progress * 100}%` }} />
         </span>
       )}

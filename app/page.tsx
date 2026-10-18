@@ -1,12 +1,51 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { TrackList, withArtist } from "@/app/components/track-row";
+import { Cover } from "@/app/components/cover";
+import { GenreFilter } from "@/app/components/genre-pills";
+import { PlayButton, TrackQueue } from "@/app/components/player";
+import { genreLabel, GridSkeleton, toPlayerTrack, TrackGrid, type TrackListRow, withArtist } from "@/app/components/track-row";
 import { GENRES } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
+import { formatDuration } from "@/lib/tracks";
 
 const FEED_LIMIT = 50;
-const pill =
-  "shrink-0 whitespace-nowrap rounded-full border border-border bg-surface-2 px-4 py-1.5 font-medium transition-colors aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background";
+
+// Öne çıkan: akışın en yeni parçası; büyük kapak, arkasında hafif turuncu glow.
+function Featured({ row, queue }: { row: TrackListRow; queue: TrackListRow[] }) {
+  const { track, artist } = row;
+  return (
+    <TrackQueue tracks={queue.map((r) => toPlayerTrack(r.track, r.artist))}>
+      <section className="flex flex-col gap-5 md:flex-row md:items-center md:gap-14">
+        <p className="text-xs font-medium tracking-[0.08em] text-text-muted uppercase md:hidden">Öne çıkan · son yüklenen</p>
+        <Link href={`/p/${track.id}`} className="w-full shrink-0 rounded-xl shadow-[0_40px_120px_-30px] shadow-accent/35 md:w-[min(420px,40%)]">
+          <Cover path={track.cover_path} title={track.title} className="w-full" />
+        </Link>
+        <div className="flex items-end justify-between gap-4 md:flex-1 md:flex-col md:items-start md:gap-5">
+          <div className="flex min-w-0 flex-col gap-1.5 md:gap-5">
+            <p className="hidden text-xs font-medium tracking-[0.1em] text-text-muted uppercase md:block">Öne çıkan · son yüklenen</p>
+            <h2 className="font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.035em] md:text-[clamp(44px,6vw,80px)] md:leading-[0.95] md:tracking-[-0.045em]">
+              <Link href={`/p/${track.id}`}>{track.title}</Link>
+            </h2>
+            <p className="text-sm text-text-muted md:text-[15px]">
+              <Link href={`/${artist.username}`} className="font-medium text-text hover:underline">
+                {artist.name}
+              </Link>
+              {" · "}
+              {genreLabel(track.genre)}
+              {track.duration_sec ? ` · ${formatDuration(track.duration_sec)}` : ""}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 md:mt-2">
+            <PlayButton track={toPlayerTrack(track, artist)} size="lg" />
+            <Link href={`/p/${track.id}`} className="btn-secondary hidden h-14 px-6 text-[15px] md:inline-flex">
+              Parçaya git
+            </Link>
+          </div>
+        </div>
+      </section>
+    </TrackQueue>
+  );
+}
 
 async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {
   const { tur, akis } = await searchParams;
@@ -44,58 +83,82 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchPara
     return q.size ? `/?${q}` : "/";
   };
 
+  const rows = withArtist(tracks ?? []);
+  // Öne çıkan sadece filtresiz "Yeni" akışında; ızgara onun dışındakileri gösterir.
+  const featured = !following && !genre ? rows[0] : undefined;
+
   return (
     <>
-      <nav className="flex gap-6 border-b border-border text-sm" aria-label="Akış">
-        {[
-          { label: "Yeni", href: genre ? `/?tur=${genre}` : "/", active: !following },
-          { label: "Takip ettiklerin", href: genre ? `/?akis=takip&tur=${genre}` : "/?akis=takip", active: following },
-        ].map((t) => (
-          <Link
-            key={t.label}
-            href={t.href}
-            aria-current={t.active ? "page" : undefined}
-            className="-mb-px border-b-2 border-transparent pb-2.5 font-semibold text-muted transition-colors hover:text-foreground aria-[current=page]:border-accent aria-[current=page]:text-foreground"
-          >
-            {t.label}
-          </Link>
-        ))}
-      </nav>
-      <nav className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 text-sm [scrollbar-width:none]" aria-label="Tür filtresi">
-        {[{ value: null, label: "Hepsi" }, ...GENRES].map((f) => (
-          <Link key={f.label} href={href(f.value)} aria-current={genre === f.value ? "page" : undefined} className={pill}>
-            {f.label}
-          </Link>
-        ))}
-      </nav>
-      <TrackList
-        rows={withArtist(tracks ?? [])}
-        empty={
-          following ? (
-            viewerId ? (
-              artistIds?.length ? `Takip ettiğin sanatçıların henüz ${genre ? "bu türde " : ""}parçası yok.` : "Henüz kimseyi takip etmiyorsun. Beğendiğin sanatçıların profilinden takip et."
+      {featured && <Featured row={featured} queue={rows} />}
+      <section className="flex flex-col gap-5 md:gap-7">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:border-b md:border-border">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.03em] md:mb-4 md:text-4xl md:tracking-[-0.035em]">
+            {following ? "Takip ettiklerin" : "Yeni Yüklenenler"}
+          </h2>
+          <nav className="flex gap-6 border-b border-border md:gap-7 md:border-0" aria-label="Akış">
+            {[
+              { label: "Yeni", href: genre ? `/?tur=${genre}` : "/", active: !following },
+              { label: "Takip ettiklerin", href: genre ? `/?akis=takip&tur=${genre}` : "/?akis=takip", active: following },
+            ].map((t) => (
+              <Link
+                key={t.label}
+                href={t.href}
+                aria-current={t.active ? "page" : undefined}
+                className="-mb-px border-b-2 border-transparent pb-3 text-[15px] font-medium text-text-muted transition duration-150 hover:text-text aria-[current=page]:border-accent aria-[current=page]:text-text md:pb-4"
+              >
+                {t.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <GenreFilter active={genre} href={href} />
+        <TrackGrid
+          rows={featured ? rows.slice(1) : rows}
+          empty={
+            following ? (
+              viewerId ? (
+                artistIds?.length ? (
+                  `Takip ettiğin sanatçıların henüz ${genre ? "bu türde " : ""}parçası yok.`
+                ) : (
+                  "Henüz kimseyi takip etmiyorsun. Beğendiğin sanatçıların profilinden takip et."
+                )
+              ) : (
+                <>
+                  Takip akışını görmek için <Link href="/giris" className="link">giriş yap</Link>.
+                </>
+              )
+            ) : featured ? (
+              "Şimdilik bu kadar. Yeni parçalar geldikçe burada."
             ) : (
-              <>Takip akışını görmek için <Link href="/giris" className="link">giriş yap</Link>.</>
+              `Henüz ${genre ? "bu türde " : ""}parça yok. İlk yükleyen sen ol.`
             )
-          ) : (
-            "Henüz parça yok. İlk yükleyen sen ol."
-          )
-        }
-      />
+          }
+        />
+      </section>
+    </>
+  );
+}
+
+function FeedSkeleton() {
+  return (
+    <>
+      <div aria-hidden className="flex flex-col gap-5 md:flex-row md:items-center md:gap-14">
+        <div className="skeleton aspect-square w-full rounded-xl md:w-[min(420px,40%)]" />
+        <div className="flex flex-1 flex-col gap-4">
+          <div className="skeleton h-9 w-3/4 md:h-16" />
+          <div className="skeleton h-3.5 w-1/2" />
+        </div>
+      </div>
+      <GridSkeleton />
     </>
   );
 }
 
 export default function Home({ searchParams }: PageProps<"/">) {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-10">
-      <header className="flex flex-col gap-2">
-        <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl">
-          Yeni sesler<span className="text-accent">.</span>
-        </h1>
-        <p className="text-muted">Keşfedilmeyi bekleyen bağımsız müzisyenler. En yeniler en üstte.</p>
-      </header>
-      <Suspense fallback={<p className="text-muted">Yükleniyor…</p>}>
+    <main className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col gap-8 px-4 py-6 md:gap-16 md:px-10 md:py-14">
+      <h1 className="sr-only">Vitrin — yeni sesler</h1>
+      <Suspense fallback={<FeedSkeleton />}>
         <Feed searchParams={searchParams} />
       </Suspense>
     </main>

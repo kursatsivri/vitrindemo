@@ -21,7 +21,7 @@ async function LinkStatus({ searchParams }: { searchParams: PageProps<"/giris">[
 
 export default function Page({ searchParams }: PageProps<"/giris">) {
   return (
-    <AuthCard title="Giriş yap">
+    <AuthCard title="Tekrar hoş geldin" subtitle="Kaldığın yerden dinlemeye devam et.">
       <Suspense>
         <LinkStatus searchParams={searchParams} />
       </Suspense>
@@ -29,9 +29,11 @@ export default function Page({ searchParams }: PageProps<"/giris">) {
         <Field label="E-posta" name="email" type="email" required autoComplete="email" />
         <Field label="Şifre" name="password" type="password" required autoComplete="current-password" />
       </ActionForm>
-      <div className="flex justify-between text-sm">
-        <Link href="/sifremi-unuttum" className="text-muted hover:text-foreground">Şifremi unuttum</Link>
-        <Link href="/kayit" className="font-semibold text-accent hover:text-accent-hover">Kayıt ol</Link>
+      <div className="-mt-1 flex flex-col items-center gap-4 text-sm">
+        <Link href="/sifremi-unuttum" className="text-text-muted hover:text-text">Şifremi unuttum</Link>
+        <p className="text-text-muted">
+          Hesabın yok mu? <Link href="/kayit" className="link">Kayıt ol</Link>
+        </p>
       </div>
     </AuthCard>
   );

@@ -26,11 +26,11 @@ export function ActionForm({
   }
 
   return (
-    <form action={formAction} onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form action={formAction} onSubmit={onSubmit} className="flex flex-col gap-5">
       {children}
       {state.error && <Notice tone="error">{state.error}</Notice>}
       {state.message && <Notice tone="success">{state.message}</Notice>}
-      <button type="submit" disabled={pending} className="btn-primary mt-1">
+      <button type="submit" disabled={pending} className="btn-primary mt-1 h-[52px] text-[15px]">
         {pending ? "Bekleyin…" : submitLabel}
       </button>
     </form>

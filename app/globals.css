@@ -1,56 +1,90 @@
 @import "tailwindcss";
 
-/* Koyu tema varsayılan (SPEC §6). Premium/sade, turuncu vurgu. */
+/* Tasarım token'ları: koyu, sade, tek vurgu rengi turuncu. Kodda sabit renk yok; hepsi buradan. */
 :root {
-  --background: #0e0e10;
-  --surface: #17171a;
-  --surface-2: #222226;
-  --border: #2c2c31;
-  --foreground: #f4f4f5;
-  --muted: #a1a1aa;
-  --subtle: #71717a;
-  --accent: #ff6a1a;
-  --accent-hover: #ff8040;
+  --bg: #0b0b0c;
+  --surface: #141416;
+  --surface-2: #1c1c1f; /* modal, oynatıcı */
+  --border: #26262a;
+  --text: #f5f5f4;
+  --text-muted: #9a9aa3;
+  --accent: #ff6a2b; /* oynat, aktif durum, sıra numarası */
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --rising: #3ddc84; /* sadece "yükselen" göstergesi */
+  --danger: #ff5a5f; /* hata mesajları */
   color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-border: var(--border);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-subtle: var(--subtle);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
   --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-display);
+  --color-accent-soft: var(--accent-soft);
+  --color-rising: var(--rising);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-inter), sans-serif;
+  --font-display: var(--font-bricolage), sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), sans-serif;
 }
 
-/* Ortak bileşen stilleri: her sayfada aynı buton/input/kart görünümü. */
+/* Klavyeyle gezerken her yerde aynı turuncu odak halkası */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Ortak bileşen stilleri: her sayfada aynı buton/input/kart/pill görünümü. */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50;
+  @apply inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-5 text-sm font-medium transition duration-150 disabled:pointer-events-none disabled:opacity-40;
 }
 @utility btn-primary {
-  @apply btn bg-accent text-black hover:bg-accent-hover;
+  @apply btn bg-accent text-bg hover:brightness-110;
 }
 @utility btn-secondary {
-  @apply btn border border-border bg-surface-2 text-foreground hover:border-subtle;
+  @apply btn border border-border bg-surface-2 text-text hover:border-text-muted/50;
+}
+@utility btn-ghost {
+  @apply btn text-text-muted hover:text-text;
+}
+/* Sadece ikonlu yuvarlak buton; aria-label şart */
+@utility icon-btn {
+  @apply inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-text transition duration-150 hover:border-text-muted/50 aria-pressed:border-accent/45 aria-pressed:bg-accent-soft aria-pressed:text-accent;
 }
 @utility input {
-  @apply rounded-xl border border-border bg-surface px-3.5 py-2.5 text-base text-foreground placeholder:text-subtle focus:border-accent focus:outline-none;
+  @apply h-12 w-full rounded-xl border border-border bg-surface px-4 text-base text-text transition duration-150 placeholder:text-text-muted/60 focus:border-accent focus:outline-none focus:ring-3 focus:ring-accent-soft;
 }
 @utility card {
   @apply rounded-2xl border border-border bg-surface;
 }
+/* Seçilebilir pill (radio/checkbox label'ı veya link); aktifken accent-soft */
+@utility chip {
+  @apply inline-flex h-9 shrink-0 cursor-pointer items-center whitespace-nowrap rounded-full border border-border bg-surface px-4 text-sm font-medium text-text-muted transition duration-150 hover:text-text has-checked:border-accent/45 has-checked:bg-accent-soft has-checked:text-accent has-disabled:cursor-not-allowed has-disabled:opacity-40 has-focus-visible:outline-2 has-focus-visible:outline-accent aria-[current=page]:border-accent/45 aria-[current=page]:bg-accent-soft aria-[current=page]:text-accent;
+}
+@utility label {
+  @apply text-[13px] font-medium text-text-muted;
+}
 @utility link {
-  @apply text-foreground underline decoration-subtle underline-offset-4 hover:decoration-accent;
+  @apply font-medium text-accent hover:underline underline-offset-4;
+}
+@utility skeleton {
+  @apply rounded-full bg-surface-2 motion-safe:animate-pulse;
 }

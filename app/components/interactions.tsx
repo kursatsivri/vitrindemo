@@ -1,5 +1,6 @@
 "use client";
 
+import { Bookmark, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -24,7 +25,7 @@ function useToggle(initial: boolean, viewerId: string | null, add: () => Promise
 }
 
 const iconButton =
-  "inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-subtle aria-pressed:border-accent aria-pressed:bg-accent/10 aria-pressed:text-accent";
+  "btn border border-border bg-surface text-text hover:border-text-muted/50 aria-pressed:border-accent/45 aria-pressed:bg-accent-soft aria-pressed:text-accent";
 
 export function LikeSaveButtons({
   trackId,
@@ -57,15 +58,11 @@ export function LikeSaveButtons({
   return (
     <>
       <button type="button" onClick={like.toggle} aria-pressed={like.on} aria-label={like.on ? "Beğeniyi geri al" : "Beğen"} className={iconButton}>
-        <svg viewBox="0 0 24 24" className={`size-5 ${like.on ? "fill-current" : "fill-none stroke-current stroke-2"}`} aria-hidden>
-          <path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.3 5 6.8 5c2 0 3.4 1.1 4.2 2.4h2C13.8 6.1 15.2 5 17.2 5c3.5 0 5.6 3.6 4.3 6.8C19.5 16.4 12 21 12 21z" />
-        </svg>
+        <Heart aria-hidden className="size-[18px]" fill={like.on ? "currentColor" : "none"} strokeWidth={1.75} />
         <span className="tabular-nums">{count}</span>
       </button>
       <button type="button" onClick={save.toggle} aria-pressed={save.on} className={iconButton}>
-        <svg viewBox="0 0 24 24" className={`size-5 ${save.on ? "fill-current" : "fill-none stroke-current stroke-2"}`} aria-hidden>
-          <path d="M6 3h12v18l-6-4-6 4z" />
-        </svg>
+        <Bookmark aria-hidden className="size-[18px]" fill={save.on ? "currentColor" : "none"} strokeWidth={1.75} />
         {save.on ? "Kaydedildi" : "Kaydet"}
       </button>
     </>
@@ -98,12 +95,12 @@ export function FollowButton({
         type="button"
         onClick={follow.toggle}
         aria-pressed={follow.on}
-        className={follow.on ? "btn-secondary" : "btn-primary"}
+        className={`${follow.on ? "btn-secondary" : "btn-primary"} h-12 px-7 text-[15px]`}
       >
         {follow.on ? "Takip ediliyor" : "Takip et"}
       </button>
-      <span className="text-sm text-muted">
-        <span className="font-semibold text-foreground tabular-nums">{count}</span> takipçi
+      <span className="text-sm text-text-muted">
+        <span className="font-medium text-text tabular-nums">{count}</span> takipçi
       </span>
     </div>
   );

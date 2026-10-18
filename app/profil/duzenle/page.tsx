@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ActionForm } from "@/app/components/action-form";
-import { Field } from "@/app/components/field";
+import { CheckCard, Field, FormSkeleton, Select, TextArea } from "@/app/components/field";
 import { ImageInput } from "@/app/components/image-input";
 import { GenrePills } from "@/app/components/genre-pills";
 import { CITIES } from "@/lib/music";
@@ -55,47 +55,36 @@ async function EditForm() {
           autoCapitalize="none"
         />
         <Field label="Görünen ad" name="display_name" defaultValue={profile.display_name ?? ""} maxLength={50} />
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-muted">Kısa biyografi</span>
-          <textarea name="bio" defaultValue={profile.bio ?? ""} maxLength={300} rows={4} className="input" />
-        </label>
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-muted">Şehir</span>
-          <select name="city" defaultValue={profile.city ?? ""} className="input">
-            <option value="">Seçilmedi</option>
-            {CITIES.map((c, i) => (
-              <option key={c} value={i + 1}>{c}</option>
-            ))}
-          </select>
-        </label>
+        <TextArea label="Kısa biyografi" name="bio" defaultValue={profile.bio ?? ""} maxLength={300} rows={4} />
+        <Select label="Şehir" name="city" defaultValue={profile.city ?? ""}>
+          <option value="">Seçilmedi</option>
+          {CITIES.map((c, i) => (
+            <option key={c} value={i + 1}>{c}</option>
+          ))}
+        </Select>
 
         {isArtist && (
           <>
             <GenrePills type="checkbox" defaultValues={profile.genres} />
             {tracks && tracks.length > 0 && (
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="font-medium text-muted">Öne çıkan parça</span>
-                <select name="featured_track_id" defaultValue={profile.featured_track_id ?? ""} className="input">
-                  <option value="">Yok</option>
-                  {tracks.map((t) => (
-                    <option key={t.id} value={t.id}>{t.title}</option>
-                  ))}
-                </select>
-                <span className="text-xs text-subtle">Profilinin en üstünde gösterilir.</span>
-              </label>
+              <Select
+                label="Öne çıkan parça"
+                name="featured_track_id"
+                defaultValue={profile.featured_track_id ?? ""}
+                hint="Profilinin en üstünde gösterilir."
+              >
+                <option value="">Yok</option>
+                {tracks.map((t) => (
+                  <option key={t.id} value={t.id}>{t.title}</option>
+                ))}
+              </Select>
             )}
-            <label className="flex items-start gap-3 rounded-xl bg-surface-2 p-3.5 text-sm">
-              <input
-                type="checkbox"
-                name="open_to_discovery"
-                defaultChecked={profile.open_to_discovery}
-                className="mt-0.5 size-4 accent-accent"
-              />
-              <span>
-                <span className="font-semibold">Keşfedilmeye açığım</span>
-                <span className="block text-xs text-muted">Yapımcı ve plak şirketlerinden teklif almak istiyorum.</span>
-              </span>
-            </label>
+            <CheckCard
+              name="open_to_discovery"
+              defaultChecked={profile.open_to_discovery}
+              title="Keşfedilmeye açığım"
+              hint="Yapımcı ve plak şirketlerinden teklif almak istiyorum."
+            />
             {SOCIALS.map((s) => (
               <Field
                 key={s.key}
@@ -116,7 +105,7 @@ async function EditForm() {
           </>
         )}
       </ActionForm>
-      <Link href={`/${profile.username}`} className="text-sm text-muted hover:text-foreground">
+      <Link href={`/${profile.username}`} className="btn-ghost self-center">
         Profilimi görüntüle →
       </Link>
     </>
@@ -125,9 +114,9 @@ async function EditForm() {
 
 export default function Page() {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-10">
-      <h1 className="font-display text-3xl font-bold tracking-tight">Profili düzenle</h1>
-      <Suspense fallback={<p className="text-muted">Yükleniyor…</p>}>
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-8 px-4 py-7 md:py-14">
+      <h1 className="font-display text-4xl leading-none font-extrabold tracking-[-0.04em] md:text-5xl">Profili düzenle</h1>
+      <Suspense fallback={<FormSkeleton fields={5} />}>
         <EditForm />
       </Suspense>
     </main>

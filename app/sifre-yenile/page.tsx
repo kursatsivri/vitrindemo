@@ -7,7 +7,7 @@ export const metadata = { title: "Yeni şifre — Vitrin" };
 
 export default function Page() {
   return (
-    <AuthCard title="Yeni şifre belirle">
+    <AuthCard title="Yeni şifre belirle" subtitle="En az 8 karakter.">
       <ActionForm action={updatePassword} submitLabel="Şifreyi kaydet">
         <Field
           label="Yeni şifre"
