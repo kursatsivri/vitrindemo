@@ -1,5 +1,6 @@
 "use client";
 
+import { ImagePlus } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { storageUrl } from "@/lib/tracks";
@@ -54,19 +55,21 @@ export function ImageInput({
     <div className="flex items-center gap-4">
       {path ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={storageUrl(bucket, path)} alt={alt} className={`size-20 shrink-0 object-cover ${shape}`} />
+        <img src={storageUrl(bucket, path)} alt={alt} className={`size-24 shrink-0 object-cover ${shape}`} />
       ) : (
-        <div className={`flex size-20 shrink-0 items-center justify-center bg-surface-2 font-display text-3xl font-semibold uppercase text-muted ${shape}`}>
-          {placeholder}
+        <div
+          className={`flex size-24 shrink-0 items-center justify-center border-[1.5px] border-dashed border-border bg-surface font-display text-3xl font-bold text-text-muted uppercase ${shape}`}
+        >
+          {placeholder || <ImagePlus aria-hidden className="size-6" strokeWidth={1.75} />}
         </div>
       )}
-      <div className="flex flex-col gap-1 text-sm">
-        <label className="btn-secondary cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent">
+      <div className="flex flex-col items-start gap-2">
+        <label className="btn-secondary h-10 cursor-pointer has-focus-visible:outline-2 has-focus-visible:outline-accent">
           {busy ? "Yükleniyor…" : path ? "Değiştir" : "Görsel seç"}
           <input type="file" accept={TYPES.join(",")} onChange={onChange} disabled={busy} className="sr-only" />
         </label>
-        <span className="text-xs text-subtle">JPG, PNG, WebP · en fazla {maxMb} MB</span>
-        {error && <span role="alert" className="text-xs text-red-300">{error}</span>}
+        <span className="text-xs text-text-muted">JPG, PNG, WebP · en fazla {maxMb} MB</span>
+        {error && <span role="alert" className="text-xs text-danger">{error}</span>}
       </div>
       <input type="hidden" name={fieldName} value={path ?? ""} readOnly />
     </div>

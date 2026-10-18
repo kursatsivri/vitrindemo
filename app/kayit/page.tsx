@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Check, Headphones, Mic } from "lucide-react";
 import { signUp } from "@/app/auth/actions";
 import { ActionForm } from "@/app/components/action-form";
 import { AuthCard } from "@/app/components/auth-card";
@@ -8,21 +9,29 @@ export const metadata = { title: "Kayıt ol — Vitrin" };
 
 export default function Page() {
   return (
-    <AuthCard title="Kayıt ol">
-      <ActionForm action={signUp} submitLabel="Kayıt ol">
-        <fieldset className="grid grid-cols-2 gap-2">
-          <legend className="mb-1.5 text-sm font-medium text-muted">Hesap türü</legend>
+    <AuthCard title="Vitrin'e katıl" subtitle="Önce nasıl katılacağını seç.">
+      <ActionForm action={signUp} submitLabel="Hesap oluştur">
+        <fieldset className="grid grid-cols-2 gap-3">
+          <legend className="label mb-2.5">Hesap türü</legend>
           {[
-            { value: "listener", label: "Dinleyici", hint: "Dinle, oy ver" },
-            { value: "artist", label: "Sanatçı", hint: "Parça yükle" },
+            { value: "listener", label: "Dinleyici", hint: "Keşfet, beğen, oy ver", icon: Headphones },
+            { value: "artist", label: "Sanatçı", hint: "Parça yükle, keşfedil", icon: Mic },
           ].map((r) => (
             <label
               key={r.value}
-              className="flex cursor-pointer flex-col rounded-xl border border-border bg-surface-2 p-3 transition-colors has-[:checked]:border-accent has-[:checked]:bg-accent/10 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
+              className="group relative flex min-h-40 cursor-pointer flex-col gap-3 rounded-2xl border border-border bg-bg p-4 transition duration-150 hover:border-text-muted/50 has-checked:border-accent has-checked:bg-accent-soft has-focus-visible:outline-2 has-focus-visible:outline-accent"
             >
               <input type="radio" name="role" value={r.value} required className="sr-only" />
-              <span className="font-semibold">{r.label}</span>
-              <span className="text-xs text-muted">{r.hint}</span>
+              <span className="absolute top-3.5 right-3.5 hidden size-[22px] items-center justify-center rounded-full bg-accent text-bg group-has-checked:flex">
+                <Check aria-hidden className="size-3.5" strokeWidth={3} />
+              </span>
+              <span className="flex size-11 items-center justify-center rounded-full bg-surface-2 text-text-muted transition duration-150 group-has-checked:bg-accent group-has-checked:text-bg">
+                <r.icon aria-hidden className="size-[22px]" strokeWidth={1.75} />
+              </span>
+              <span className="flex flex-col gap-1">
+                <span className="font-display text-xl font-bold tracking-tight">{r.label}</span>
+                <span className="text-[13px] leading-snug text-text-muted">{r.hint}</span>
+              </span>
             </label>
           ))}
         </fieldset>
@@ -48,9 +57,8 @@ export default function Page() {
           hint="En az 8 karakter"
         />
       </ActionForm>
-      <p className="text-sm text-muted">
-        Hesabın var mı?{" "}
-        <Link href="/giris" className="font-semibold text-accent hover:text-accent-hover">Giriş yap</Link>
+      <p className="-mt-1 text-center text-sm text-text-muted">
+        Hesabın var mı? <Link href="/giris" className="link">Giriş yap</Link>
       </p>
     </AuthCard>
   );

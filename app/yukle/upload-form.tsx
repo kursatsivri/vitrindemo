@@ -1,7 +1,8 @@
 "use client";
 
+import { ImagePlus, Music, Upload, X } from "lucide-react";
 import { useState } from "react";
-import { Field } from "@/app/components/field";
+import { CheckCard, Field, TextArea } from "@/app/components/field";
 import { TrackMetaFields } from "@/app/components/track-meta-fields";
 import { Notice } from "@/app/components/notice";
 import { createClient } from "@/lib/supabase/client";
@@ -31,21 +32,34 @@ export function UploadForm({ userId }: { userId: string }) {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const busy = status !== "";
 
-  function pickAudio(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
+  // Seçilen ya da sürükle-bırakılan ses dosyası; geçersizse false döner.
+  function takeAudio(file: File | null) {
     setError("");
     if (file && !AUDIO_TYPES.includes(file.type) && !file.name.toLowerCase().endsWith(".mp3")) {
-      e.target.value = "";
-      return setError("Ses dosyası MP3 olmalı.");
+      setError("Ses dosyası MP3 olmalı.");
+      return false;
     }
     if (file && file.size > AUDIO_MAX_BYTES) {
-      e.target.value = "";
-      return setError("Ses dosyası en fazla 15 MB olabilir.");
+      setError("Ses dosyası en fazla 15 MB olabilir.");
+      return false;
     }
     if (audioUrl) URL.revokeObjectURL(audioUrl);
     setAudio(file);
     setAudioUrl(file ? URL.createObjectURL(file) : null);
+    return true;
+  }
+
+  function pickAudio(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!takeAudio(e.target.files?.[0] ?? null)) e.target.value = "";
+  }
+
+  function dropAudio(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    if (!busy) takeAudio(e.dataTransfer.files[0] ?? null);
   }
 
   function pickCover(e: React.ChangeEvent<HTMLInputElement>) {
@@ -111,57 +125,92 @@ export function UploadForm({ userId }: { userId: string }) {
     }
   }
 
-  const busy = status !== "";
-
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5">
-      <label className="card flex cursor-pointer flex-col items-center gap-1 border-dashed p-6 text-center transition-colors hover:border-subtle has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent">
-        <span className="text-3xl" aria-hidden>♪</span>
-        <span className="font-semibold">{audio ? audio.name : "Ses dosyası seç"}</span>
-        <span className="text-xs text-subtle">
-          {audio ? `${(audio.size / 1024 / 1024).toFixed(1)} MB` : "MP3 · en fazla 15 MB"}
-        </span>
-        <input type="file" accept=".mp3,audio/mpeg" onChange={pickAudio} disabled={busy} className="sr-only" />
-      </label>
-
-      <div className="flex items-center gap-4">
-        <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-surface-2">
-          {coverPreview && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverPreview} alt="Kapak önizleme" className="size-full object-cover" />
-          )}
-        </div>
-        <div className="flex flex-col gap-1 text-sm">
-          <label className="btn-secondary cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent">
-            {cover ? "Kapağı değiştir" : "Kapak seç (opsiyonel)"}
-            <input type="file" accept={COVER_TYPES.join(",")} onChange={pickCover} disabled={busy} className="sr-only" />
+    <form onSubmit={onSubmit} className="flex flex-col gap-10 md:flex-row md:items-start">
+      <div className="flex flex-col gap-6 md:flex-1">
+        {audio ? (
+          <div className="flex items-center gap-3.5 rounded-2xl border-[1.5px] border-accent/45 bg-accent-soft p-5">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-bg">
+              <Music aria-hidden className="size-5" strokeWidth={2} />
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="truncate text-[15px] font-medium">{audio.name}</span>
+              <span className="text-[13px] text-text-muted">{(audio.size / 1024 / 1024).toFixed(1)} MB</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => takeAudio(null)}
+              disabled={busy}
+              aria-label="Ses dosyasını kaldır"
+              className="icon-btn size-9 border-transparent bg-transparent text-text-muted hover:text-text"
+            >
+              <X aria-hidden className="size-[18px]" strokeWidth={1.75} />
+            </button>
+          </div>
+        ) : (
+          <label
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={dropAudio}
+            className={`flex h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-[1.5px] border-dashed bg-surface text-center transition duration-150 hover:border-text-muted/50 has-focus-visible:outline-2 has-focus-visible:outline-accent md:h-56 ${dragging ? "border-accent bg-accent-soft" : "border-border"}`}
+          >
+            <span className="flex size-13 items-center justify-center rounded-full bg-accent-soft text-accent">
+              <Upload aria-hidden className="size-6" strokeWidth={1.75} />
+            </span>
+            <span className="flex flex-col gap-1">
+              <span className="text-[15px] font-medium">MP3&apos;ünü buraya bırak</span>
+              <span className="text-[13px] text-text-muted">
+                ya da <span className="text-accent">dosya seç</span> · en fazla 15 MB
+              </span>
+            </span>
+            <input type="file" accept=".mp3,audio/mpeg" onChange={pickAudio} disabled={busy} className="sr-only" />
           </label>
-          <span className="text-xs text-subtle">JPG, PNG, WebP · en fazla 3 MB · kare gösterilir</span>
+        )}
+
+        <div className="flex items-center gap-4">
+          <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border-[1.5px] border-dashed border-border bg-surface text-text-muted">
+            {coverPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={coverPreview} alt="Kapak önizleme" className="size-full object-cover" />
+            ) : (
+              <ImagePlus aria-hidden className="size-6" strokeWidth={1.75} />
+            )}
+          </div>
+          <div className="flex flex-col items-start gap-2">
+            <label className="btn-secondary h-10 cursor-pointer has-focus-visible:outline-2 has-focus-visible:outline-accent">
+              {cover ? "Kapağı değiştir" : "Kapak seç"}
+              <input type="file" accept={COVER_TYPES.join(",")} onChange={pickCover} disabled={busy} className="sr-only" />
+            </label>
+            <span className="text-xs text-text-muted">Opsiyonel · JPG, PNG, WebP · 3 MB · kare</span>
+          </div>
         </div>
       </div>
 
-      <Field label="Başlık" name="title" required maxLength={80} disabled={busy} />
+      <div className="flex flex-col gap-6 md:flex-[1.4]">
+        <Field label="Başlık" name="title" required maxLength={80} disabled={busy} placeholder="Parçanın adı" />
 
-      <fieldset disabled={busy} className="flex flex-col gap-5">
-        <TrackMetaFields previewSrc={audioUrl} />
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-muted">Açıklama (opsiyonel)</span>
-          <textarea name="description" maxLength={500} rows={3} className="input" />
-        </label>
-      </fieldset>
+        <fieldset disabled={busy} className="flex flex-col gap-6">
+          <TrackMetaFields previewSrc={audioUrl} />
+          <TextArea label="Açıklama (opsiyonel)" name="description" maxLength={500} rows={3} />
+        </fieldset>
 
-      <label className="flex items-start gap-3 rounded-xl bg-surface-2 p-3.5 text-sm">
-        <input type="checkbox" name="rights" required disabled={busy} className="mt-0.5 size-4 accent-accent" />
-        <span>
-          Bu parçanın tüm haklarına sahibim. İzinsiz sample veya başkasının beat&apos;ini içermiyor.
-        </span>
-      </label>
+        <CheckCard
+          name="rights"
+          required
+          disabled={busy}
+          title="Bu parçanın tüm haklarına sahibim"
+          hint="İzinsiz sample veya başkasının beat'ini içermiyor."
+        />
 
-      {error && <Notice tone="error">{error}</Notice>}
+        {error && <Notice tone="error">{error}</Notice>}
 
-      <button type="submit" disabled={busy} className="btn-primary">
-        {status || "Yükle"}
-      </button>
+        <button type="submit" disabled={busy} className="btn-primary h-[52px] text-[15px] md:self-end md:px-9">
+          {status || "Yükle"}
+        </button>
+      </div>
     </form>
   );
 }
