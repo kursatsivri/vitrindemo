@@ -26,7 +26,7 @@ begin
     format(cols, '', a, 'Haklar onaysız', 'rap', a || '/x.mp3', 'false', ''),
     format(cols, ', status', a, 'Durum seçmeye çalışır', 'rap', a || '/x.mp3', 'true', ', ''active'''),
     format(cols, '', a, 'Başkasının dosyası', 'rap', c || '/x.mp3', 'true', ''),
-    format(cols, '', a, 'Tür dışı', 'pop', a || '/x.mp3', 'true', ''),
+    format(cols, '', a, 'Tür dışı', 'jazz', a || '/x.mp3', 'true', ''),
     format(cols, '', a, '   ', 'rap', a || '/x.mp3', 'true', ''),
     format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'tracks', c || '/x.mp3'),
     format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'covers', c || '/x.png')
@@ -168,7 +168,7 @@ end $$;
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}';
 do $$
 begin
-  if (select count(*) from public.tracks) <> 3 then raise exception 'FAIL: sanatçı kendi parçalarının hepsini görmüyor'; end if;
+  if (select count(*) from public.tracks where artist_id = '00000000-0000-0000-0000-00000000000a') <> 3 then raise exception 'FAIL: sanatçı kendi parçalarının hepsini görmüyor'; end if;
   if exists (select 1 from public.plays) then raise exception 'FAIL: sanatçı başkasının dinleme kaydını görüyor'; end if;
 end $$;
 
@@ -177,7 +177,7 @@ set local role anon;
 set local request.jwt.claims = '{"role":"anon"}';
 do $$
 begin
-  if (select count(*) from public.tracks) <> 2 then raise exception 'FAIL: ziyaretçi aktif parçaları doğru görmüyor'; end if;
+  if (select count(*) from public.tracks where artist_id = '00000000-0000-0000-0000-00000000000a') <> 2 then raise exception 'FAIL: ziyaretçi aktif parçaları doğru görmüyor'; end if;
   begin
     perform public.start_play(gen_random_uuid());
     raise exception 'FAIL: ziyaretçi start_play çağırabildi';

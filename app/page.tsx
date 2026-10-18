@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { TrackRow } from "@/app/components/track-row";
-import { GENRES } from "@/lib/profile";
+import { TrackQueue } from "@/app/components/player";
+import { toPlayerTrack, TrackRow } from "@/app/components/track-row";
+import { GENRES } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
 
 const FEED_LIMIT = 50;
@@ -23,34 +24,32 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchPara
   // Hata "parça yok" gibi görünmesin
   if (error) throw new Error(`Akış yüklenemedi: ${error.message}`);
 
+  const rows = (tracks ?? []).flatMap((t) =>
+    t.profiles ? [{ track: t, artist: { name: t.profiles.display_name || t.profiles.username, username: t.profiles.username } }] : [],
+  );
   const filters = [{ value: null, label: "Hepsi" }, ...GENRES];
   return (
     <>
-      <nav className="flex gap-2 text-sm" aria-label="Tür filtresi">
+      <nav className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 text-sm [scrollbar-width:none]" aria-label="Tür filtresi">
         {filters.map((f) => (
           <Link
             key={f.label}
             href={f.value ? `/?tur=${f.value}` : "/"}
             aria-current={genre === f.value ? "page" : undefined}
-            className="rounded-full border border-border bg-surface-2 px-4 py-1.5 font-medium transition-colors aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background"
+            className="shrink-0 whitespace-nowrap rounded-full border border-border bg-surface-2 px-4 py-1.5 font-medium transition-colors aria-[current=page]:border-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background"
           >
             {f.label}
           </Link>
         ))}
       </nav>
-      {tracks && tracks.length > 0 ? (
-        <ul className="divide-y divide-border">
-          {tracks.map((t) =>
-            t.profiles ? (
-              <TrackRow
-                key={t.id}
-                track={t}
-                artist={{ name: t.profiles.display_name || t.profiles.username, username: t.profiles.username }}
-                showArtist
-              />
-            ) : null,
-          )}
-        </ul>
+      {rows.length > 0 ? (
+        <TrackQueue tracks={rows.map((r) => toPlayerTrack(r.track, r.artist))}>
+          <ul className="divide-y divide-border">
+            {rows.map((r) => (
+              <TrackRow key={r.track.id} track={r.track} artist={r.artist} showArtist />
+            ))}
+          </ul>
+        </TrackQueue>
       ) : (
         <p className="py-8 text-muted">Henüz parça yok. İlk yükleyen sen ol.</p>
       )}
@@ -65,7 +64,7 @@ export default function Home({ searchParams }: PageProps<"/">) {
         <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl">
           Yeni sesler<span className="text-accent">.</span>
         </h1>
-        <p className="text-muted">Bağımsız rap ve beat&apos;ler. En yeniler en üstte.</p>
+        <p className="text-muted">Keşfedilmeyi bekleyen bağımsız müzisyenler. En yeniler en üstte.</p>
       </header>
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-xl font-semibold">Yeni yüklenenler</h2>

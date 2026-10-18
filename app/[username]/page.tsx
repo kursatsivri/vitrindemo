@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar } from "@/app/components/avatar";
-import { TrackRow } from "@/app/components/track-row";
-import { GENRES, ROLE_LABELS, SOCIALS } from "@/lib/profile";
+import { TrackQueue } from "@/app/components/player";
+import { toPlayerTrack, TrackRow } from "@/app/components/track-row";
+import { cityName, GENRES } from "@/lib/music";
+import { ROLE_LABELS, SOCIALS } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 
 async function Profile({ params }: { params: PageProps<"/[username]">["params"] }) {
@@ -13,7 +15,7 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
   const [{ data: profile }, { data: claims }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, role, username, display_name, bio, genres, socials, avatar_path")
+      .select("id, role, username, display_name, bio, genres, socials, avatar_path, city, open_to_discovery, featured_track_id")
       .eq("username", decodeURIComponent(username).toLowerCase())
       .maybeSingle(),
     supabase.auth.getClaims(),
@@ -34,6 +36,11 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
         .order("created_at", { ascending: false })
     : { data: [], error: null };
   if (error) throw new Error(`Parçalar yüklenemedi: ${error.message}`);
+  // Öne çıkan parça listenin başında
+  const ordered = [...(tracks ?? [])].sort(
+    (x, y) => Number(y.id === profile.featured_track_id) - Number(x.id === profile.featured_track_id),
+  );
+  const city = cityName(profile.city);
 
   return (
     <article className="flex flex-col gap-6">
@@ -44,7 +51,15 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
             {ROLE_LABELS[profile.role]}
           </span>
           <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">{name}</h1>
-          <p className="text-sm text-muted">@{profile.username}</p>
+          <p className="text-sm text-muted">
+            @{profile.username}
+            {city && <> · {city}</>}
+          </p>
+          {isArtist && profile.open_to_discovery && (
+            <span className="w-fit rounded-full border border-emerald-800 bg-emerald-950/50 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+              Keşfedilmeye açık
+            </span>
+          )}
         </div>
       </header>
 
@@ -83,12 +98,20 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
       {isArtist && (
         <section className="flex flex-col gap-2">
           <h2 className="font-display text-xl font-semibold">Parçalar</h2>
-          {tracks && tracks.length > 0 ? (
+          {ordered.length > 0 ? (
+            <TrackQueue tracks={ordered.map((t) => toPlayerTrack(t, { name, username: profile.username }))}>
             <ul className="divide-y divide-border">
-              {tracks.map((t) => (
-                <TrackRow key={t.id} track={t} artist={{ name, username: profile.username }} isOwner={isOwner} />
+              {ordered.map((t) => (
+                <TrackRow
+                  key={t.id}
+                  track={t}
+                  artist={{ name, username: profile.username }}
+                  isOwner={isOwner}
+                  featured={t.id === profile.featured_track_id}
+                />
               ))}
             </ul>
+            </TrackQueue>
           ) : (
             <p className="text-muted">
               {isOwner ? (

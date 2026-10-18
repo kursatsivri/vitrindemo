@@ -1,4 +1,4 @@
-import { GENRES } from "@/lib/profile";
+import { GENRES } from "@/lib/music";
 
 // Rap/Beat seçimi: parça için tek (radio), profil için çoklu (checkbox).
 export function GenrePills({
@@ -11,7 +11,7 @@ export function GenrePills({
   disabled?: boolean;
 }) {
   return (
-    <fieldset className="flex gap-2 text-sm" disabled={disabled}>
+    <fieldset className="flex flex-wrap gap-2 text-sm" disabled={disabled}>
       <legend className="mb-1.5 font-medium text-muted">Tür</legend>
       {GENRES.map((g) => (
         <label

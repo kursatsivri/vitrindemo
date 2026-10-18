@@ -2,7 +2,9 @@
 
 import { redirect } from "next/navigation";
 import type { FormState } from "@/app/components/action-form";
+import { GENRES } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
+import { readTrackMeta, resolveFeatures, syncFeatures } from "@/lib/track-form";
 
 async function ownTrack(id: string) {
   const supabase = await createClient();
@@ -10,7 +12,7 @@ async function ownTrack(id: string) {
   if (!user) redirect("/giris");
   const { data: track } = await supabase
     .from("tracks")
-    .select("id, audio_path, cover_path, profiles!artist_id(username)")
+    .select("id, audio_path, cover_path, duration_sec, profiles!artist_id(username)")
     .eq("id", id)
     .eq("artist_id", user.id)
     .maybeSingle();
@@ -27,14 +29,32 @@ export async function updateTrack(_: FormState, formData: FormData): Promise<For
   const coverPath = String(formData.get("cover_path") ?? "") || null;
 
   if (!title) return { error: "Başlık gerekli." };
-  if (genre !== "rap" && genre !== "beat") return { error: "Tür seç: Rap veya Beat." };
+  if (!GENRES.some((g) => g.value === genre)) return { error: "Tür seç." };
   if (coverPath && !coverPath.startsWith(`${user.id}/`)) return { error: "Geçersiz kapak." };
+
+  const meta = readTrackMeta(formData, genre, track.duration_sec);
+  if ("error" in meta) return meta;
+  const feats = await resolveFeatures(supabase, meta.featUsernames, user.id);
+  if ("error" in feats) return { error: feats.error };
 
   const { error } = await supabase
     .from("tracks")
-    .update({ title, genre, description, cover_path: coverPath })
+    .update({
+      title,
+      genre,
+      description,
+      cover_path: coverPath,
+      tags: meta.tags,
+      moods: meta.moods,
+      hook_sec: meta.hook_sec,
+      seeking_vocal: meta.seeking_vocal,
+      links: meta.links,
+    })
     .eq("id", track.id);
   if (error) return { error: "Kaydedilemedi. Lütfen tekrar dene." };
+
+  const synced = await syncFeatures(supabase, track.id, feats.ids);
+  if (synced.error) return { error: synced.error };
 
   // Eski kapağı sil (başarısız olursa sorun değil, sadece depoda yer kaplar).
   if (track.cover_path && track.cover_path !== coverPath) {
