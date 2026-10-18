@@ -27,6 +27,8 @@ const getTrack = cache(async (id: string) => {
   return track && track.profiles ? { track, artist: track.profiles, viewerId: claims?.claims.sub } : null;
 });
 
+// Not: `next dev`te bot (WhatsApp vb.) isteğinde "did not produce a static shell" invariant
+// uyarısı loglanır; yanıt doğrudur ve production build'de (next start) çıkmaz — Next.js hatası.
 export async function generateMetadata({ params }: PageProps<"/p/[id]">): Promise<Metadata> {
   const found = await getTrack((await params).id);
   if (!found) return { title: "Parça bulunamadı — Vitrin" };
