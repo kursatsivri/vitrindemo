@@ -134,3 +134,12 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - Sitenin adı ve alan adı
 - Tür ve etiket listesinin son hali
 - GitHub fatura kilidi (CI'ı engelliyor)
+
+## 💡 Fikir havuzu (plana alınmadı, sonra değerlendirilecek)
+- Kör dinleme modu — keşfette isim/takipçi/oy gizli, sadece müzik
+- Vitrin Wrapped — ay/yıl sonu paylaşılabilir özet kartları
+- Vitrin Gecesi — her pazar canlı geri sayımla top 10 açıklaması
+- "Şuna benzeyen yeni yetenekleri bul" — ses benzerliğiyle ünlü sanatçıya benzeyenler
+- Tarayıcıda stüdyo — beat üzerine telefondan 16 bar kaydet
+- Canlı Türkiye haritası — şu an dinlenenler şehir şehir
+- Kafiye haritası — rap sözlerinde kafiyeler renkli
