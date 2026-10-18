@@ -80,7 +80,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setTime(0);
     setDuration(0);
     a.src = storageUrl("tracks", t.audioPath);
-    a.play();
+    // Yükleme sırasında duraklatılırsa play() reddedilir; zararsız.
+    a.play().catch(() => {});
     // Girişsiz dinleme sayılmaz (SPEC kararı); oturum yerel, hızlı okunur.
     createClient().auth.getSession().then(({ data }) => {
       l.loggedIn = !!data.session;
@@ -92,7 +93,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const a = audio.current;
     if (!a) return;
     if (current?.id === t.id) {
-      if (a.paused) a.play();
+      if (a.paused) a.play().catch(() => {});
       else a.pause();
       return;
     }

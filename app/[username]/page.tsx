@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar } from "@/app/components/avatar";
+import { FollowButton } from "@/app/components/interactions";
 import { TrackQueue } from "@/app/components/player";
 import { toPlayerTrack, TrackRow } from "@/app/components/track-row";
 import { cityName, GENRES } from "@/lib/music";
@@ -24,8 +25,17 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
 
   const name = profile.display_name || profile.username;
   const socials = (profile.socials ?? {}) as Record<string, string>;
-  const isOwner = claims?.claims.sub === profile.id;
+  const viewerId = (claims?.claims.sub as string | undefined) ?? null;
+  const isOwner = viewerId === profile.id;
   const isArtist = profile.role === "artist";
+
+  const [{ count: followers }, { count: following }, { data: myFollow }] = await Promise.all([
+    supabase.from("follows").select("*", { count: "exact", head: true }).eq("followee_id", profile.id),
+    supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", profile.id),
+    viewerId && !isOwner
+      ? supabase.from("follows").select("followee_id").eq("follower_id", viewerId).eq("followee_id", profile.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
 
   // Gizlenen parçaları RLS sadece sahibine döndürür.
   const { data: tracks, error } = isArtist
@@ -89,11 +99,23 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
         </ul>
       )}
 
-      {isOwner && (
-        <Link href="/profil/duzenle" className="btn-secondary w-fit self-center sm:self-start">
-          Profili düzenle
-        </Link>
-      )}
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
+        {isOwner ? (
+          <>
+            <Link href="/profil/duzenle" className="btn-secondary">
+              Profili düzenle
+            </Link>
+            <span className="text-sm text-muted">
+              <span className="font-semibold text-foreground tabular-nums">{followers ?? 0}</span> takipçi
+            </span>
+          </>
+        ) : (
+          <FollowButton profileId={profile.id} viewerId={viewerId} following={!!myFollow} followerCount={followers ?? 0} />
+        )}
+        <span className="text-sm text-muted">
+          <span className="font-semibold text-foreground tabular-nums">{following ?? 0}</span> takip
+        </span>
+      </div>
 
       {isArtist && (
         <section className="flex flex-col gap-2">

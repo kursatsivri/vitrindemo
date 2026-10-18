@@ -37,6 +37,126 @@ export type Database = {
           },
         ]
       }
+      banned_terms: {
+        Row: {
+          pattern: string
+        }
+        Insert: {
+          pattern: string
+        }
+        Update: {
+          pattern?: string
+        }
+        Relationships: []
+      }
+      comments: {
+        Row: {
+          at_sec: number | null
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          track_id: string
+        }
+        Insert: {
+          at_sec?: number | null
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          track_id: string
+        }
+        Update: {
+          at_sec?: number | null
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_followee_id_fkey"
+            columns: ["followee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      likes: {
+        Row: {
+          created_at: string
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plays: {
         Row: {
           counted_at: string | null
@@ -129,6 +249,84 @@ export type Database = {
           },
         ]
       }
+      ratings: {
+        Row: {
+          created_at: string
+          s1: number
+          s2: number
+          s3: number
+          s4: number
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          s1: number
+          s2: number
+          s3: number
+          s4: number
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          s1?: number
+          s2?: number
+          s3?: number
+          s4?: number
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saves: {
+        Row: {
+          created_at: string
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saves_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saves_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       track_features: {
         Row: {
           artist_id: string
@@ -163,6 +361,7 @@ export type Database = {
         Row: {
           artist_id: string
           audio_path: string
+          comments_enabled: boolean
           cover_path: string | null
           created_at: string
           description: string | null
@@ -182,6 +381,7 @@ export type Database = {
         Insert: {
           artist_id: string
           audio_path: string
+          comments_enabled?: boolean
           cover_path?: string | null
           created_at?: string
           description?: string | null
@@ -201,6 +401,7 @@ export type Database = {
         Update: {
           artist_id?: string
           audio_path?: string
+          comments_enabled?: boolean
           cover_path?: string | null
           created_at?: string
           description?: string | null
@@ -232,7 +433,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_rate: { Args: { p_track: string }; Returns: boolean }
       count_play: { Args: { p_track: string }; Returns: boolean }
+      is_active_track: { Args: { p_track: string }; Returns: boolean }
+      rating_summary: {
+        Args: { p_track: string }
+        Returns: {
+          a1: number
+          a2: number
+          a3: number
+          a4: number
+          n: number
+        }[]
+      }
       start_play: { Args: { p_track: string }; Returns: undefined }
     }
     Enums: {

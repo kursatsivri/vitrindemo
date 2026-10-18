@@ -82,3 +82,10 @@ export function parseTime(text: string) {
   const sec = Number(m[1] ?? 0) * 60 + Number(m[2]);
   return m[1] && Number(m[2]) > 59 ? null : sec;
 }
+
+// Yapılandırılmış geri bildirim kriterleri (ratings.s1–s4 sırasıyla)
+export function ratingCriteria(genre: string) {
+  return genre === "beat"
+    ? ["Melodi", "Davul / ritim", "Mix", "Özgünlük"]
+    : ["Vokal", "Flow / ritim", "Söz", "Prodüksiyon"];
+}

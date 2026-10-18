@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache, Suspense } from "react";
+import { Comments } from "@/app/components/comments";
 import { Cover } from "@/app/components/cover";
+import { LikeSaveButtons } from "@/app/components/interactions";
 import { PlayButton } from "@/app/components/player";
+import { RatingPanel } from "@/app/components/rating-panel";
 import { ShareButton } from "@/app/components/share-button";
 import { toPlayerTrack } from "@/app/components/track-row";
 import { Waveform } from "@/app/components/waveform";
-import { GENRES, labelOf, MOODS, TAGS, TRACK_LINKS } from "@/lib/music";
+import { GENRES, labelOf, MOODS, ratingCriteria, TAGS, TRACK_LINKS } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
+import { timeAgo } from "@/lib/time";
 import { formatDuration, storageUrl } from "@/lib/tracks";
 
 // generateMetadata ve sayfa aynı isteği paylaşır.
@@ -18,13 +22,15 @@ const getTrack = cache(async (id: string) => {
     supabase
       .from("tracks")
       .select(
-        "id, artist_id, title, genre, tags, moods, description, audio_path, cover_path, duration_sec, waveform, links, seeking_vocal, status, created_at, profiles!artist_id(username, display_name), track_features(profiles(username, display_name))",
+        "id, artist_id, title, genre, tags, moods, description, audio_path, cover_path, duration_sec, waveform, links, seeking_vocal, status, comments_enabled, created_at, profiles!artist_id(username, display_name), track_features(profiles(username, display_name))",
       )
       .eq("id", id)
       .maybeSingle(),
     supabase.auth.getClaims(),
   ]);
-  return track && track.profiles ? { track, artist: track.profiles, viewerId: claims?.claims.sub } : null;
+  return track && track.profiles
+    ? { supabase, track, artist: track.profiles, viewerId: (claims?.claims.sub as string | undefined) ?? null }
+    : null;
 });
 
 // Not: `next dev`te bot (WhatsApp vb.) isteğinde "did not produce a static shell" invariant
@@ -48,7 +54,30 @@ export async function generateMetadata({ params }: PageProps<"/p/[id]">): Promis
 async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] }) {
   const found = await getTrack((await params).id);
   if (!found) notFound();
-  const { track, artist, viewerId } = found;
+  const { supabase, track, artist, viewerId } = found;
+  const isOwner = viewerId === track.artist_id;
+
+  // ponytail: son 100 yorum; çok yorumlu parçalarda "daha fazla" ekle.
+  const [{ count: likeCount }, comments, summary, mine] = await Promise.all([
+    supabase.from("likes").select("*", { count: "exact", head: true }).eq("track_id", track.id),
+    supabase
+      .from("comments")
+      .select("id, body, at_sec, created_at, author_id, profiles!author_id(username, display_name, avatar_path)")
+      .eq("track_id", track.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    supabase.rpc("rating_summary", { p_track: track.id }).single(),
+    viewerId
+      ? Promise.all([
+          supabase.from("likes").select("track_id").eq("track_id", track.id).eq("user_id", viewerId).maybeSingle(),
+          supabase.from("saves").select("track_id").eq("track_id", track.id).maybeSingle(),
+          supabase.from("ratings").select("s1, s2, s3, s4").eq("track_id", track.id).maybeSingle(),
+          supabase.from("plays").select("day").eq("track_id", track.id).not("counted_at", "is", null).limit(1),
+        ])
+      : null,
+  ]);
+  // RLS: saves/ratings/plays sadece kendi satırlarını döndürür.
+  const [liked, saved, myRating, listened] = mine ?? [null, null, null, null];
 
   const name = artist.display_name || artist.username;
   const playerTrack = toPlayerTrack(track, { name, username: artist.username });
@@ -100,7 +129,14 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
 
       <div className="flex flex-wrap items-center gap-2">
         <ShareButton title={`${track.title} — ${name}`} />
-        {viewerId === track.artist_id && (
+        <LikeSaveButtons
+          trackId={track.id}
+          viewerId={viewerId}
+          liked={!!liked?.data}
+          saved={!!saved?.data}
+          likeCount={likeCount ?? 0}
+        />
+        {isOwner && (
           <Link href={`/parca/${track.id}/duzenle`} className="btn-secondary">
             Düzenle
           </Link>
@@ -141,6 +177,31 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
           </ul>
         </section>
       )}
+
+      <RatingPanel
+        trackId={track.id}
+        viewerId={viewerId}
+        criteria={ratingCriteria(track.genre)}
+        isOwner={isOwner}
+        canRate={(listened?.data ?? []).length > 0}
+        mine={myRating?.data ? [myRating.data.s1, myRating.data.s2, myRating.data.s3, myRating.data.s4] : null}
+        summary={{
+          n: summary.data?.n ?? 0,
+          avgs: [summary.data?.a1 ?? null, summary.data?.a2 ?? null, summary.data?.a3 ?? null, summary.data?.a4 ?? null],
+        }}
+      />
+
+      <Comments
+        track={playerTrack}
+        viewerId={viewerId}
+        ownerId={track.artist_id}
+        enabled={track.comments_enabled}
+        comments={(comments.data ?? []).flatMap((c) =>
+          c.profiles
+            ? [{ id: c.id, body: c.body, atSec: c.at_sec, ago: timeAgo(c.created_at), authorId: c.author_id, author: c.profiles }]
+            : [],
+        )}
+      />
     </article>
   );
 }
