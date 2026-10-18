@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ExternalLink, Pencil } from "lucide-react";
 import { cache, Suspense } from "react";
 import { Comments } from "@/app/components/comments";
 import { Cover } from "@/app/components/cover";
@@ -89,17 +90,19 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
   ];
 
   return (
-    <article className="flex flex-col gap-8">
-      <header className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-end sm:text-left">
-        <Cover path={track.cover_path} title={track.title} className="w-56 rounded-2xl shadow-2xl shadow-accent/10" />
+    <article className="flex flex-col gap-10">
+      <header className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-end sm:gap-10 sm:text-left">
+        <Cover path={track.cover_path} title={track.title} className="w-full max-w-72 shadow-[0_40px_120px_-30px] shadow-accent/35 sm:w-64" />
         <div className="flex min-w-0 flex-col items-center gap-2 sm:items-start">
-          <span className="text-xs font-semibold uppercase tracking-widest text-accent">
+          <span className="text-[13px] text-text-muted">
             {labelOf(GENRES, track.genre)}
             {track.duration_sec ? ` · ${formatDuration(track.duration_sec)}` : ""}
           </span>
-          <h1 className="font-display text-4xl font-bold tracking-tight break-words sm:text-5xl">{track.title}</h1>
-          <p className="text-muted">
-            <Link href={`/${artist.username}`} className="font-semibold text-foreground hover:underline">
+          <h1 className="max-w-full font-display text-[40px] leading-none font-extrabold tracking-[-0.04em] break-words sm:text-6xl sm:tracking-[-0.045em]">
+            {track.title}
+          </h1>
+          <p className="text-text-muted">
+            <Link href={`/${artist.username}`} className="font-medium text-text hover:underline">
               {name}
             </Link>
             {feats.length > 0 && (
@@ -108,7 +111,7 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
                 {feats.map((f, i) => (
                   <span key={f.username}>
                     {i > 0 && ", "}
-                    <Link href={`/${f.username}`} className="hover:text-foreground hover:underline">
+                    <Link href={`/${f.username}`} className="hover:text-text hover:underline">
                       {f.display_name || f.username}
                     </Link>
                   </span>
@@ -117,13 +120,13 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
             )}
           </p>
           {track.status !== "active" && (
-            <span className="rounded-full bg-red-950/60 px-2 py-0.5 text-xs text-red-200">Bu parça gizlendi; sadece sen görüyorsun.</span>
+            <span className="rounded-full bg-danger/10 px-3 py-1 text-xs font-medium text-danger">Bu parça gizlendi; sadece sen görüyorsun.</span>
           )}
         </div>
       </header>
 
       <div className="flex items-center gap-4">
-        <PlayButton track={playerTrack} large />
+        <PlayButton track={playerTrack} size="lg" />
         <Waveform track={playerTrack} peaks={track.waveform} />
       </div>
 
@@ -138,11 +141,12 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
         />
         {isOwner && (
           <Link href={`/parca/${track.id}/duzenle`} className="btn-secondary">
+            <Pencil aria-hidden className="size-4" strokeWidth={1.75} />
             Düzenle
           </Link>
         )}
         {track.seeking_vocal && (
-          <span className="rounded-full border border-accent/50 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+          <span className="inline-flex h-7 items-center rounded-full bg-accent-soft px-3 text-xs font-medium text-accent">
             Rapçi / vokal arıyor
           </span>
         )}
@@ -151,16 +155,16 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
       {chips.length > 0 && (
         <ul className="flex flex-wrap gap-2 text-sm">
           {chips.map((c) => (
-            <li key={c} className="rounded-full bg-surface-2 px-3 py-1 text-muted">{c}</li>
+            <li key={c} className="inline-flex h-7 items-center rounded-full bg-surface-2 px-3 text-[13px] text-text-muted">{c}</li>
           ))}
         </ul>
       )}
 
-      {track.description && <p className="whitespace-pre-line text-foreground/90">{track.description}</p>}
+      {track.description && <p className="whitespace-pre-line text-text/90">{track.description}</p>}
 
       {TRACK_LINKS.some((l) => links[l.key]) && (
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-semibold text-muted">Diğer platformlarda</h2>
+          <h2 className="label">Diğer platformlarda</h2>
           <ul className="flex flex-wrap gap-2 text-sm">
             {TRACK_LINKS.filter((l) => links[l.key]).map((l) => (
               <li key={l.key}>
@@ -168,9 +172,10 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
                   href={links[l.key]}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="block rounded-full border border-border px-3 py-1 text-muted transition-colors hover:border-subtle hover:text-foreground"
+                  className="chip gap-2"
                 >
-                  {l.label} ↗
+                  {l.label}
+                  <ExternalLink aria-hidden className="size-3.5" strokeWidth={1.75} />
                 </a>
               </li>
             ))}
@@ -208,8 +213,18 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
 
 export default function Page({ params }: PageProps<"/p/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-      <Suspense fallback={<p className="text-muted">Yükleniyor…</p>}>
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 md:py-14">
+      <Suspense
+        fallback={
+          <div aria-hidden className="flex flex-col items-center gap-6 sm:flex-row sm:items-end sm:gap-10">
+            <div className="skeleton aspect-square w-full max-w-72 rounded-xl sm:w-64" />
+            <div className="flex flex-col items-center gap-3 sm:items-start">
+              <div className="skeleton h-10 w-64 sm:h-14 sm:w-80" />
+              <div className="skeleton h-3.5 w-40" />
+            </div>
+          </div>
+        }
+      >
         <TrackPage params={params} />
       </Suspense>
     </main>
