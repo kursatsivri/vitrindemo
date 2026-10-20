@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Compass, MapPin, Search, Upload } from "lucide-react";
+import { Bell, Compass, MapPin, Search, Upload } from "lucide-react";
 import { Suspense } from "react";
 import { Avatar } from "@/app/components/avatar";
 import { AccountMenu, NavLinks } from "@/app/components/header-nav";
@@ -41,17 +41,25 @@ async function UserNav() {
     );
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, username, display_name, avatar_path")
-    .eq("id", userId)
-    .single();
+  const [{ data: profile }, { count: unread }] = await Promise.all([
+    supabase.from("profiles").select("role, username, display_name, avatar_path").eq("id", userId).single(),
+    // ponytail: sayfa geçişinde güncellenir; anlık gerekirse Supabase Realtime
+    supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
+  ]);
   const name = profile ? profile.display_name || profile.username : "";
   return (
     <>
       <NavLinks />
       <div className="flex flex-1 items-center justify-end gap-3 md:flex-none">
         <QuickLinks />
+        <Link href="/bildirimler" aria-label={unread ? `Bildirimler, ${unread} okunmamış` : "Bildirimler"} className={`${iconLink} relative`}>
+          <Bell aria-hidden className="size-5" strokeWidth={1.75} />
+          {!!unread && (
+            <span className="absolute top-1 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-bg tabular-nums">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
+        </Link>
         {profile?.role === "artist" && (
           <>
             <Link href="/yukle" aria-label="Parça yükle" className="btn-primary size-10 px-0 md:hidden">

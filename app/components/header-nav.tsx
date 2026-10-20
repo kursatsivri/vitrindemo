@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheck, Bookmark, Briefcase, ChartColumn, Compass, House, LogOut, Pencil, SlidersHorizontal, Trophy, User, Users } from "lucide-react";
+import { BadgeCheck, Bookmark, Briefcase, ChartColumn, Compass, House, LogOut, Pencil, ShieldCheck, SlidersHorizontal, Swords, Trophy, User, Users } from "lucide-react";
 import { useRef } from "react";
 import { signOut } from "@/app/auth/actions";
 
@@ -17,6 +17,7 @@ const LINKS = [
   { href: "/", label: "Ana sayfa", icon: House, auth: false },
   { href: "/kesfet", label: "Keşfet", icon: Compass, auth: false },
   { href: "/siralama", label: "Sıralama", icon: Trophy, auth: false },
+  { href: "/challenge", label: "Challenge", icon: Swords, auth: false },
   { href: "/firsatlar", label: "Fırsatlar", icon: Briefcase, auth: false },
   { href: "/?akis=takip", label: "Takip ettiklerin", icon: Users, auth: true },
   { href: "/profil/kaydedilenler", label: "Kaydedilenler", icon: Bookmark, auth: true },
@@ -49,7 +50,7 @@ const ROLE_LINKS: Record<string, { href: string; label: string; icon: typeof Use
   artist: { href: "/profil/panel", label: "Sanatçı paneli", icon: ChartColumn },
   scout: { href: "/kesifci", label: "Keşifçi paneli", icon: BadgeCheck },
   listener: { href: "/kesifci", label: "Keşifçi ol", icon: BadgeCheck },
-  admin: { href: "/admin/kesifciler", label: "Keşifçi başvuruları", icon: BadgeCheck },
+  admin: { href: "/admin", label: "Yönetici paneli", icon: ShieldCheck },
 };
 
 export function AccountMenu({ username, name, role, children }: { username: string; name: string; role: string; children: React.ReactNode }) {

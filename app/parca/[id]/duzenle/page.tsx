@@ -20,7 +20,7 @@ async function EditTrack({ params }: { params: PageProps<"/parca/[id]/duzenle">[
   const { data: track } = await supabase
     .from("tracks")
     .select(
-      "id, title, genre, description, cover_path, audio_path, tags, moods, hook_sec, seeking_vocal, links, track_features(profiles(username))",
+      "id, title, genre, description, cover_path, audio_path, tags, moods, hook_sec, seeking_vocal, challenge_candidate, links, track_features(profiles(username))",
     )
     .eq("id", id)
     .eq("artist_id", user.id)
@@ -49,6 +49,7 @@ async function EditTrack({ params }: { params: PageProps<"/parca/[id]/duzenle">[
             moods: track.moods,
             hookSec: track.hook_sec,
             seekingVocal: track.seeking_vocal,
+            challengeCandidate: track.challenge_candidate,
             links: track.links as Record<string, string>,
             feats: track.track_features.flatMap((f) => (f.profiles ? [f.profiles.username] : [])),
           }}

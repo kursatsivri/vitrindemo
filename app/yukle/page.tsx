@@ -4,24 +4,31 @@ import { CalendarClock, Mic } from "lucide-react";
 import { Suspense } from "react";
 import { EmptyState } from "@/app/components/notice";
 import { createClient } from "@/lib/supabase/server";
-import { WEEKLY_UPLOAD_LIMIT, weekStart } from "@/lib/tracks";
+import { periodStart, WEEKLY_UPLOAD_LIMIT, weekStart } from "@/lib/tracks";
+import { Notice } from "@/app/components/notice";
 import { FormSkeleton } from "@/app/components/field";
 import { UploadForm } from "./upload-form";
 
 export const metadata = { title: "Parça yükle — Vitrin" };
 
-async function Upload() {
+async function Upload({ searchParams }: { searchParams: PageProps<"/yukle">["searchParams"] }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/giris");
+  const { challenge: challengeParam } = await searchParams;
 
-  const [{ data: profile }, { count }] = await Promise.all([
+  const [{ data: profile }, { count }, { data: challenge }] = await Promise.all([
     supabase.from("profiles").select("role").eq("id", user.id).single(),
     supabase
       .from("tracks")
       .select("id", { count: "exact", head: true })
       .eq("artist_id", user.id)
-      .gte("created_at", weekStart().toISOString()),
+      .gte("created_at", weekStart().toISOString())
+      .is("challenge_id", null),
+    // Challenge katılımı haftalık sınıra sayılmaz; sadece bu haftanın challenge’ı
+    typeof challengeParam === "string" && /^[0-9a-f-]{36}$/.test(challengeParam)
+      ? supabase.from("challenges").select("id, week_start, tracks!beat_track_id(title)").eq("id", challengeParam).eq("week_start", periodStart("week")).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
   if (profile?.role !== "artist") {
@@ -29,6 +36,18 @@ async function Upload() {
       <EmptyState icon={Mic} title="Sadece sanatçılar yükleyebilir" action={<Link href="/" className="btn-secondary">Ana sayfaya dön</Link>}>
         Dinleyici hesabıyla parça yüklenemiyor.
       </EmptyState>
+    );
+  }
+
+  if (challenge) {
+    return (
+      <>
+        <Notice tone="success">
+          Haftanın challenge’ına katılıyorsun: “{challenge.tracks?.title}” beat’i üzerine vokalli parçanı yükle. Katılım haftalık hakkına sayılmaz;
+          beatmaker otomatik olarak prodüksiyon etiketlenir.
+        </Notice>
+        <UploadForm userId={user.id} challenge={{ id: challenge.id, beatTitle: challenge.tracks?.title ?? "" }} />
+      </>
     );
   }
 
@@ -65,12 +84,12 @@ function Quota({ left }: { left: number }) {
   );
 }
 
-export default function Page() {
+export default function Page({ searchParams }: PageProps<"/yukle">) {
   return (
     <main className="relative mx-auto flex w-full max-w-[1040px] flex-1 flex-col gap-8 px-4 py-7 md:gap-10 md:px-10 md:py-14">
       <h1 className="font-display text-4xl leading-none font-extrabold tracking-[-0.04em] md:text-[56px] md:tracking-[-0.045em]">Parça yükle</h1>
       <Suspense fallback={<FormSkeleton />}>
-        <Upload />
+        <Upload searchParams={searchParams} />
       </Suspense>
     </main>
   );

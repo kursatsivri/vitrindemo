@@ -180,6 +180,55 @@ async function WeeklyTop() {
   );
 }
 
+// Editörün seçimi (sıralamadan ayrı, açıkça "editör" etiketli) ve son challenge kazananı + beatmaker.
+async function Showcase() {
+  const supabase = await createClient();
+  const [{ data: pick }, { data: last }] = await Promise.all([
+    supabase
+      .from("editor_picks")
+      .select("note, tracks(id, title, genre, cover_path, duration_sec, audio_path, status, profiles!artist_id(username, display_name))")
+      .eq("week_start", periodStart("week"))
+      .maybeSingle(),
+    supabase
+      .from("challenges")
+      .select("winner:tracks!winner_track_id(id, title, genre, cover_path, duration_sec, audio_path, status, profiles!artist_id(username, display_name)), beat:tracks!beat_track_id(profiles!artist_id(username, display_name))")
+      .not("winner_track_id", "is", null)
+      .order("week_start", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  const picked = pick?.tracks ? withArtist([pick.tracks]) : [];
+  const winner = last?.winner ? withArtist([last.winner]) : [];
+  const beatmaker = last?.beat?.profiles;
+  if (picked.length === 0 && winner.length === 0) return null;
+  return (
+    <section className="grid gap-6 md:grid-cols-2 md:gap-10">
+      {picked.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.03em]">
+            Editörün seçimi <span className="ml-1 rounded-full bg-surface-2 px-2 py-0.5 align-middle text-xs font-medium text-text-muted">editör</span>
+          </h2>
+          {pick?.note && <p className="text-sm text-text-muted">“{pick.note}”</p>}
+          <TrackGrid rows={picked} empty={null} />
+        </div>
+      )}
+      {winner.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.03em]">
+            <Link href="/challenge" className="hover:underline">Challenge kazananı</Link>
+          </h2>
+          {beatmaker && (
+            <p className="text-sm text-text-muted">
+              Beat: <Link href={`/${beatmaker.username}`} className="link">{beatmaker.display_name || beatmaker.username}</Link>
+            </p>
+          )}
+          <TrackGrid rows={winner} empty={null} />
+        </div>
+      )}
+    </section>
+  );
+}
+
 function FeedSkeleton() {
   return (
     <>
@@ -201,6 +250,9 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <h1 className="sr-only">Vitrin — yeni sesler</h1>
       <Suspense>
         <WeeklyTop />
+      </Suspense>
+      <Suspense>
+        <Showcase />
       </Suspense>
       <Suspense>
         <ForYou />

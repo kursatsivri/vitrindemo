@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BadgeCheck, Camera, Check, Cloud, ExternalLink, MonitorPlay, Music } from "lucide-react";
+import { BadgeCheck, Ban, Camera, Check, Cloud, ExternalLink, MonitorPlay, Music, Swords } from "lucide-react";
 import { Suspense } from "react";
 import { Avatar } from "@/app/components/avatar";
-import { FavoriteButton, FollowButton, InterestButton } from "@/app/components/interactions";
+import { BlockButton, FavoriteButton, FollowButton, InterestButton } from "@/app/components/interactions";
+import { ReportButton } from "@/app/components/report-button";
 import { ActionForm } from "@/app/components/action-form";
 import { TextArea } from "@/app/components/field";
 import { saveNote } from "@/app/kesifci/actions";
@@ -40,7 +41,7 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
   const isOwner = viewerId === profile.id;
   const isArtist = profile.role === "artist";
 
-  const [{ count: followers }, { count: following }, { data: myFollow }, { data: best }, viewer, scoutOrg] = await Promise.all([
+  const [{ count: followers }, { count: following }, { data: myFollow }, { data: best }, viewer, scoutOrg, blockedMe, iBlocked, win] = await Promise.all([
     supabase.from("follows").select("*", { count: "exact", head: true }).eq("followee_id", profile.id),
     supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", profile.id),
     viewerId && !isOwner
@@ -55,7 +56,20 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
       .maybeSingle(),
     viewerId && !isOwner ? supabase.from("profiles").select("role").eq("id", viewerId).single() : null,
     profile.role === "scout" ? supabase.from("scout_profiles").select("org_name").eq("user_id", profile.id).maybeSingle() : null,
+    viewerId && !isOwner ? supabase.rpc("is_blocked", { p_blocker: profile.id, p_blocked: viewerId }) : null,
+    viewerId && !isOwner ? supabase.from("blocks").select("blocked_id").eq("blocked_id", profile.id).maybeSingle() : null,
+    isArtist
+      ? supabase.from("challenges").select("id, tracks!winner_track_id!inner(artist_id)").eq("tracks.artist_id", profile.id).limit(1).maybeSingle()
+      : null,
   ]);
+  // Seni engelleyen kişinin profili görünmez (ponytail: veriler herkese açık; bu girişli kullanıcı için arayüz kuralı).
+  if (blockedMe?.data) {
+    return (
+      <div className="mx-auto w-full max-w-md px-4 py-24">
+        <EmptyState icon={Ban} title="Bu profil görüntülenemiyor" />
+      </div>
+    );
+  }
   // Onaylı keşifçi sanatçı profilinde: görüntüleme sayılır (DB sadece keşifçiyi sayar), favori/not/ilgi araçları açılır.
   const scoutView = viewer?.data?.role === "scout" && isArtist;
   const [, fav, interest] = scoutView
@@ -122,6 +136,12 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
                 </span>
               )}
               <BestRank best={best} />
+              {win?.data && (
+                <Link href="/challenge" className="inline-flex h-7 items-center gap-1.5 rounded-full bg-accent-soft px-3 text-xs font-medium text-accent">
+                  <Swords aria-hidden className="size-3.5" strokeWidth={2} />
+                  Challenge kazananı
+                </Link>
+              )}
             </div>
             <h1 className="max-w-full font-display text-[42px] leading-none font-extrabold tracking-[-0.04em] break-words md:text-[clamp(48px,7vw,96px)] md:leading-[0.92] md:tracking-[-0.05em]">
               {name}
@@ -155,6 +175,12 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
             <ShareButton title={`${name} — Vitrin`} iconOnly />
           </div>
         </header>
+        {viewerId && !isOwner && (
+          <div className="-mt-4 flex justify-center gap-1 md:-mt-10 md:justify-end">
+            <ReportButton targetType="profile" targetId={profile.id} viewerId={viewerId} />
+            <BlockButton profileId={profile.id} viewerId={viewerId} blocked={!!iBlocked?.data} />
+          </div>
+        )}
 
         {scoutView && (
           <section aria-label="Keşifçi araçları" className="card flex flex-col gap-4 p-4 md:p-5">

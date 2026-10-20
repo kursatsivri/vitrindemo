@@ -48,6 +48,7 @@ export async function updateTrack(_: FormState, formData: FormData): Promise<For
       moods: meta.moods,
       hook_sec: meta.hook_sec,
       seeking_vocal: meta.seeking_vocal,
+      challenge_candidate: meta.challenge_candidate,
       links: meta.links,
     })
     .eq("id", track.id);

@@ -14,8 +14,8 @@ Toplam **10 faz** (0–9). Her faz: çalıştırılır → test edilir → GitHu
 | 3 | Türler, parça sayfası, beğeni, kaydet, takip, yorum, geri bildirim | ✅ Bitti |
 | 4 | Oylama, sıralamalar, erken keşifçi puanı | ✅ Bitti |
 | 5 | Keşfet modu (kaydırma), öneriler, yakınındaki yetenekler | 🔍 Kod bitti, test bekliyor |
-| 6 | Keşifçi tarafı, eşleşme, fırsat panosu | 🔍 Kod bitti, test bekliyor |
-| 7 | Bildirimler, şikayet, yönetici paneli, haftalık challenge | ⏳ |
+| 6 | Keşifçi tarafı, eşleşme, fırsat panosu | ✅ Bitti (girişli uçtan uca test bekliyor) |
+| 7 | Bildirimler, şikayet, yönetici paneli, haftalık challenge | 🔍 Kod bitti, test bekliyor |
 | 8 | Canlıya çıkış | ⏳ |
 | 9 | Premium üyelik ve mesajlaşma | ⏳ (şirket kaydından sonra) |
 
@@ -92,13 +92,16 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - **Kararlar (20 Ekim 2026):** başvuruyu sadece dinleyici hesabı yapar, onaylanınca hesap "Onaylı Keşifçi" olur · onay şimdilik küçük `/admin/kesifciler` sayfasından (Faz 7'de tam panel) · ilan başvurusundan "Eşleş" denince iletişim hemen açılır (sanatçı başvurarak onay vermiş sayılır) · ilgi sadece "keşfedilmeye açık" sanatçıya, günde en fazla 20 · yetenek alarmı şimdilik keşifçi panelinde liste, bildirim Faz 7'de
 - **Sayfalar:** `/kesifci` (başvuru / keşifçi paneli), `/kesifci/ara`, `/profil/panel` (sanatçı paneli), `/firsatlar`, `/firsatlar/[id]`, `/admin/kesifciler`
 
-## Faz 7 — Bildirimler, güvenlik ve challenge ⏳
+## Faz 7 — Bildirimler, güvenlik ve challenge 🔍 (kod bitti, test bekliyor)
 - **Bildirim merkezi:** takipçi, beğeni, yorum, "ilk 10'a girdin", ilgi/eşleşme, takip ettiğin sanatçının yeni parçası
 - Önemli olanlar için e-posta (kapatılabilir)
 - **Şikayet et** (parça, yorum, profil): telif, uygunsuz içerik, sahte hesap, taciz
 - **Engelleme**
 - **Yönetici paneli:** keşifçi başvuruları, şikayetler, şüpheli oylar, içerik/hesap kaldırma, **Editörün seçimi**
 - **Haftalık challenge:** her hafta bir beatmaker'ın beat'i seçilir, rapçiler üzerine yazıp yükler, oylarla kazanan belli olur; kazanan ve beatmaker ana sayfada + rozet
+- **+ Captcha (Faz 4'ten kalan):** kayıt, giriş, şifre sıfırlamada Cloudflare Turnstile
+- **Kararlar (20 Ekim 2026):** e-posta bildirimi Faz 8'de (alan adıyla) · hesap kaldırma = askıya alma (giriş kapanır, parçalar gizlenir, geri açılabilir) · challenge: pazartesi–cuma katılım, pazar 23:59'a kadar oylama, katılım haftalık 3 hakka sayılmaz, beatmaker otomatik feat olur ve katılımlara oy veremez · şüpheli oy: aynı IP'den oy veren 3+ hesap yöneticiye listelenir, otomatik işlem yok
+- **Sayfalar:** `/bildirimler`, `/challenge`, `/admin` (şikayetler, askıdakiler), `/admin/kesifciler`, `/admin/oylar`, `/admin/vitrin` (editörün seçimi, challenge beat'i)
 
 ## Faz 8 — Canlıya çıkış ⏳ (gerçek kullanıcıya açılış)
 - Yasal sayfalar: kullanım şartları, KVKK, çerezler, telif bildirimi (hukukçu kontrolü)

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@/app/components/avatar";
 import { Notice } from "@/app/components/notice";
+import { ReportButton } from "@/app/components/report-button";
 import { usePlayer, type PlayerTrack } from "@/app/components/player";
 import { createClient } from "@/lib/supabase/client";
 import { formatDuration } from "@/lib/tracks";
@@ -163,11 +164,14 @@ export function Comments({
                   {c.body}
                 </p>
               </div>
-              {(viewerId === c.authorId || isOwner) && (
-                <button type="button" onClick={() => remove(c.id)} className="self-start text-xs text-text-muted hover:text-danger">
-                  Sil
-                </button>
-              )}
+              <div className="flex shrink-0 flex-col items-end gap-1 self-start">
+                {(viewerId === c.authorId || isOwner) && (
+                  <button type="button" onClick={() => remove(c.id)} className="text-xs text-text-muted hover:text-danger">
+                    Sil
+                  </button>
+                )}
+                {viewerId && viewerId !== c.authorId && <ReportButton targetType="comment" targetId={c.id} viewerId={viewerId} compact />}
+              </div>
             </li>
           ))}
         </ul>

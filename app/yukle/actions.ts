@@ -28,6 +28,9 @@ export async function createTrack(formData: FormData): Promise<FormState> {
   }
   const durationSec = duration >= 1 && duration <= 3600 ? duration : null;
 
+  const rawChallenge = String(formData.get("challenge_id") ?? "");
+  const challengeId = /^[0-9a-f-]{36}$/.test(rawChallenge) ? rawChallenge : null;
+
   const meta = readTrackMeta(formData, genre, durationSec);
   if ("error" in meta) return meta;
   const feats = await resolveFeatures(supabase, meta.featUsernames, user.id);
@@ -46,11 +49,15 @@ export async function createTrack(formData: FormData): Promise<FormState> {
     moods: meta.moods,
     hook_sec: meta.hook_sec,
     seeking_vocal: meta.seeking_vocal,
+    challenge_candidate: meta.challenge_candidate,
+    challenge_id: challengeId,
     links: meta.links,
     waveform: readWaveform(formData),
   }).select("id").single();
   if (error) {
     if (error.hint === "weekly_limit") return { error: "Bu haftalık yükleme hakkın doldu (en fazla 3 parça)." };
+    if (error.code === "P0001") return { error: error.message };
+    if (error.code === "23505" && challengeId) return { error: "Bu challenge'a zaten katıldın." };
     if (error.code === "42501") return { error: "Sadece sanatçı hesapları parça yükleyebilir." };
     return { error: "Parça kaydedilemedi. Lütfen tekrar dene." };
   }

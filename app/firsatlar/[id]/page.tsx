@@ -13,6 +13,7 @@ import { cityName, GENRES, labelOf } from "@/lib/music";
 import { SEEKING, trToday } from "@/lib/scouts";
 import { createClient } from "@/lib/supabase/server";
 import { applyOpportunity, closeOpportunity, reviewApplication } from "../actions";
+import { ReportButton } from "@/app/components/report-button";
 
 export const metadata: Metadata = { title: "İlan | Vitrin" };
 
@@ -114,6 +115,11 @@ async function Opportunity({ params }: { params: PageProps<"/firsatlar/[id]">["p
         {o.profiles && <ArtistLine p={o.profiles} sub={org?.org_name ?? "Onaylı keşifçi"} />}
       </header>
       <p className="text-[15px] leading-relaxed whitespace-pre-line">{o.body}</p>
+      {viewerId && !isOwner && (
+        <div className="-mt-2">
+          <ReportButton targetType="opportunity" targetId={o.id} viewerId={viewerId} />
+        </div>
+      )}
 
       {isOwner ? (
         <section className="flex flex-col gap-3">

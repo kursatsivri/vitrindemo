@@ -9,6 +9,7 @@ export type TrackMeta = {
   moods: string[];
   hook_sec: number;
   seeking_vocal: boolean;
+  challenge_candidate: boolean;
   links: Record<string, string>;
   featUsernames: string[];
 };
@@ -43,6 +44,7 @@ export function readTrackMeta(formData: FormData, genre: string, durationSec: nu
     moods: pick(formData, "moods", MOODS, MAX_MOODS),
     hook_sec: hook,
     seeking_vocal: genre === "beat" && formData.get("seeking_vocal") === "on",
+    challenge_candidate: genre === "beat" && formData.get("challenge_candidate") === "on",
     links: links.links,
     featUsernames,
   };
