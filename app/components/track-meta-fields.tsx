@@ -58,6 +58,7 @@ export type TrackMetaDefaults = {
   moods?: string[];
   hookSec?: number;
   seekingVocal?: boolean;
+  challengeCandidate?: boolean;
   feats?: string[];
   links?: Record<string, string>;
 };
@@ -92,6 +93,14 @@ export function TrackMetaFields({ defaults = {}, previewSrc }: { defaults?: Trac
           defaultChecked={defaults.seekingVocal}
           title="Rapçi / vokal arıyorum"
           hint="Bu beat üzerine yazacak birini arıyorsan işaretle."
+        />
+      )}
+      {genre === "beat" && (
+        <CheckCard
+          name="challenge_candidate"
+          defaultChecked={defaults.challengeCandidate}
+          title="Haftalık challenge'a aday"
+          hint="Seçilirse rapçiler bu beat'i indirip üzerine yazar; sen otomatik prodüksiyon olarak etiketlenirsin."
         />
       )}
 

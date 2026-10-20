@@ -25,7 +25,7 @@ function audioDuration(file: File) {
 
 // Dosyalar tarayıcıdan doğrudan Storage'a gider (server action 1 MB sınırına takılmasın diye),
 // ardından createTrack kaydı açar. Kayıt başarısız olursa yüklenen dosyalar geri silinir.
-export function UploadForm({ userId }: { userId: string }) {
+export function UploadForm({ userId, challenge }: { userId: string; challenge?: { id: string; beatTitle: string } }) {
   const [audio, setAudio] = useState<File | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [cover, setCover] = useState<File | null>(null);
@@ -127,6 +127,7 @@ export function UploadForm({ userId }: { userId: string }) {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-10 md:flex-row md:items-start">
+      {challenge && <input type="hidden" name="challenge_id" value={challenge.id} />}
       <div className="flex flex-col gap-6 md:flex-1">
         {audio ? (
           <div className="flex items-center gap-3.5 rounded-2xl border-[1.5px] border-accent/45 bg-accent-soft p-5">
