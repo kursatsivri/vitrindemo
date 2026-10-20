@@ -11,7 +11,7 @@ insert into auth.users (id, email, raw_user_meta_data) values
 do $$
 declare r text;
 begin
-  foreach r in array array['admin', 'label'] loop
+  foreach r in array array['admin', 'scout'] loop
     begin
       insert into auth.users (id, email, raw_user_meta_data)
       values (gen_random_uuid(), r || '@test.local', jsonb_build_object('role', r, 'username', 'test_' || r));
