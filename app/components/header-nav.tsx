@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Bookmark, House, LogOut, Pencil, Trophy, User, Users } from "lucide-react";
+import { Bookmark, Compass, House, LogOut, Pencil, SlidersHorizontal, Trophy, User, Users } from "lucide-react";
 import { useRef } from "react";
 import { signOut } from "@/app/auth/actions";
 
@@ -14,18 +14,19 @@ function useActive() {
 }
 
 const LINKS = [
-  { href: "/", label: "Ana sayfa", icon: House },
-  { href: "/siralama", label: "Sıralama", icon: Trophy },
-  { href: "/?akis=takip", label: "Takip ettiklerin", icon: Users },
-  { href: "/profil/kaydedilenler", label: "Kaydedilenler", icon: Bookmark },
+  { href: "/", label: "Ana sayfa", icon: House, auth: false },
+  { href: "/kesfet", label: "Keşfet", icon: Compass, auth: false },
+  { href: "/siralama", label: "Sıralama", icon: Trophy, auth: false },
+  { href: "/?akis=takip", label: "Takip ettiklerin", icon: Users, auth: true },
+  { href: "/profil/kaydedilenler", label: "Kaydedilenler", icon: Bookmark, auth: true },
 ];
 
-// Masaüstü üst menü; mobilde aynı linkler hesap menüsünde.
-export function NavLinks() {
+// Masaüstü üst menü; mobilde aynı linkler hesap menüsünde. Girişsizde hesap gerektirenler gizli.
+export function NavLinks({ loggedIn = true }: { loggedIn?: boolean }) {
   const active = useActive();
   return (
     <nav aria-label="Ana menü" className="hidden flex-1 gap-7 text-sm font-medium md:flex">
-      {LINKS.map((l) => (
+      {LINKS.filter((l) => loggedIn || !l.auth).map((l) => (
         <Link
           key={l.href}
           href={l.href}
@@ -73,6 +74,10 @@ export function AccountMenu({ username, name, children }: { username: string; na
         <Link href="/profil/duzenle" onClick={close} className={item}>
           <Pencil aria-hidden className="size-[18px]" strokeWidth={1.75} />
           Profili düzenle
+        </Link>
+        <Link href="/tercihler" onClick={close} className={item}>
+          <SlidersHorizontal aria-hidden className="size-[18px]" strokeWidth={1.75} />
+          Tercihlerim
         </Link>
         <form action={signOut}>
           <button type="submit" className={`${item} w-full text-text-muted`}>
