@@ -25,7 +25,7 @@ async function Upload({ searchParams }: { searchParams: PageProps<"/yukle">["sea
       .eq("artist_id", user.id)
       .gte("created_at", weekStart().toISOString())
       .is("challenge_id", null),
-    // Challenge katılımı haftalık sınıra sayılmaz; sadece bu haftanın challenge'ı
+    // Challenge katılımı haftalık sınıra sayılmaz; sadece bu haftanın challenge’ı
     typeof challengeParam === "string" && /^[0-9a-f-]{36}$/.test(challengeParam)
       ? supabase.from("challenges").select("id, week_start, tracks!beat_track_id(title)").eq("id", challengeParam).eq("week_start", periodStart("week")).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -43,7 +43,7 @@ async function Upload({ searchParams }: { searchParams: PageProps<"/yukle">["sea
     return (
       <>
         <Notice tone="success">
-          Haftanın challenge'ına katılıyorsun: “{challenge.tracks?.title}” beat'i üzerine vokalli parçanı yükle. Katılım haftalık hakkına sayılmaz;
+          Haftanın challenge’ına katılıyorsun: “{challenge.tracks?.title}” beat’i üzerine vokalli parçanı yükle. Katılım haftalık hakkına sayılmaz;
           beatmaker otomatik olarak prodüksiyon etiketlenir.
         </Notice>
         <UploadForm userId={user.id} challenge={{ id: challenge.id, beatTitle: challenge.tracks?.title ?? "" }} />

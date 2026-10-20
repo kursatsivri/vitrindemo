@@ -9,12 +9,12 @@ import { adminClient } from "../guard";
 
 export const metadata: Metadata = { title: "Şüpheli oylar | Vitrin" };
 
-// Aynı IP'yi paylaşan ve son 30 günde oy veren 3+ hesap. Otomatik işlem yok: okul/mobil hat gibi ortak IP olabilir.
+// Aynı IP’yi paylaşan ve son 30 günde oy veren 3+ hesap. Otomatik işlem yok: okul/mobil hat gibi ortak IP olabilir.
 async function Clusters() {
   const supabase = await adminClient();
   const { data, error } = await supabase.rpc("suspicious_vote_clusters");
   if (error) throw new Error(`Yüklenemedi: ${error.message}`);
-  if (data.length === 0) return <EmptyState icon={ShieldCheck} title="Şüpheli küme yok">Aynı IP'den oy veren 3+ hesap görünmüyor.</EmptyState>;
+  if (data.length === 0) return <EmptyState icon={ShieldCheck} title="Şüpheli küme yok">Aynı IP’den oy veren 3+ hesap görünmüyor.</EmptyState>;
 
   const ids = [...new Set(data.flatMap((c) => c.users))];
   const { data: people } = await supabase.from("profiles").select(`id, ${PROFILE_MINI}, created_at`).in("id", ids);

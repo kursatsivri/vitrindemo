@@ -57,9 +57,9 @@ async function Showcase() {
             </li>
           ))}
         </ul>
-        <h3 className="text-sm font-medium">Aday beat'ler</h3>
+        <h3 className="text-sm font-medium">Aday beat’ler</h3>
         {(beats ?? []).length === 0 ? (
-          <p className="text-sm text-text-muted">Henüz aday beat yok. Beatmaker'lar yükleme formunda "Haftalık challenge'a aday" seçeneğini işaretleyince burada görünür.</p>
+          <p className="text-sm text-text-muted">Henüz aday beat yok. Beatmaker’lar yükleme formunda “Haftalık challenge’a aday” seçeneğini işaretleyince burada görünür.</p>
         ) : (
           <ul className="divide-y divide-border">
             {(beats ?? []).map((b) => b.profiles && (
