@@ -49,6 +49,81 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          beat_track_id: string
+          created_at: string
+          finished_at: string | null
+          id: string
+          week_start: string
+          winner_track_id: string | null
+        }
+        Insert: {
+          beat_track_id: string
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          week_start: string
+          winner_track_id?: string | null
+        }
+        Update: {
+          beat_track_id?: string
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          week_start?: string
+          winner_track_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_beat_track_id_fkey"
+            columns: ["beat_track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_winner_track_id_fkey"
+            columns: ["winner_track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           at_sec: number | null
@@ -129,6 +204,45 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      editor_picks: {
+        Row: {
+          created_at: string
+          note: string | null
+          picked_by: string | null
+          track_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          note?: string | null
+          picked_by?: string | null
+          track_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          note?: string | null
+          picked_by?: string | null
+          track_id?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editor_picks_picked_by_fkey"
+            columns: ["picked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "editor_picks_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
             referencedColumns: ["id"]
           },
         ]
@@ -234,6 +348,67 @@ export type Database = {
           },
           {
             foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          data: Json
+          dedupe: string | null
+          entity_id: string | null
+          id: string
+          read_at: string | null
+          track_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          data?: Json
+          dedupe?: string | null
+          entity_id?: string | null
+          id?: string
+          read_at?: string | null
+          track_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          data?: Json
+          dedupe?: string | null
+          entity_id?: string | null
+          id?: string
+          read_at?: string | null
+          track_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -422,6 +597,7 @@ export type Database = {
           open_to_discovery: boolean
           role: string
           socials: Json
+          suspended_at: string | null
           username: string
         }
         Insert: {
@@ -436,6 +612,7 @@ export type Database = {
           open_to_discovery?: boolean
           role: string
           socials?: Json
+          suspended_at?: string | null
           username: string
         }
         Update: {
@@ -450,6 +627,7 @@ export type Database = {
           open_to_discovery?: boolean
           role?: string
           socials?: Json
+          suspended_at?: string | null
           username?: string
         }
         Relationships: [
@@ -558,6 +736,60 @@ export type Database = {
           {
             foreignKeyName: "ratings_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_resolved_by_fkey"
+            columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -785,6 +1017,8 @@ export type Database = {
         Row: {
           artist_id: string
           audio_path: string
+          challenge_candidate: boolean
+          challenge_id: string | null
           comments_enabled: boolean
           cover_path: string | null
           created_at: string
@@ -805,6 +1039,8 @@ export type Database = {
         Insert: {
           artist_id: string
           audio_path: string
+          challenge_candidate?: boolean
+          challenge_id?: string | null
           comments_enabled?: boolean
           cover_path?: string | null
           created_at?: string
@@ -825,6 +1061,8 @@ export type Database = {
         Update: {
           artist_id?: string
           audio_path?: string
+          challenge_candidate?: boolean
+          challenge_id?: string | null
           comments_enabled?: boolean
           cover_path?: string | null
           created_at?: string
@@ -848,6 +1086,13 @@ export type Database = {
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracks_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
             referencedColumns: ["id"]
           },
         ]
@@ -1021,6 +1266,8 @@ export type Database = {
       }
     }
     Functions: {
+      admin_close_opportunity: { Args: { p_opp: string }; Returns: undefined }
+      admin_delete_comment: { Args: { p_comment: string }; Returns: undefined }
       alert_matches: {
         Args: never
         Returns: {
@@ -1063,6 +1310,16 @@ export type Database = {
       }
       can_rate: { Args: { p_track: string }; Returns: boolean }
       cast_vote: { Args: { p_track: string }; Returns: boolean }
+      challenge_standings: {
+        Args: { p_challenge: string }
+        Returns: {
+          artist_id: string
+          last_vote_at: string
+          rank: number
+          score: number
+          track_id: string
+        }[]
+      }
       compute_ranking: {
         Args: { p_period: string; p_start: string }
         Returns: {
@@ -1078,6 +1335,11 @@ export type Database = {
         }[]
       }
       count_play: { Args: { p_track: string }; Returns: boolean }
+      create_challenge: {
+        Args: { p_beat: string; p_week: string }
+        Returns: string
+      }
+      daily_notifications: { Args: never; Returns: undefined }
       discover_feed: {
         Args: {
           p_city?: number
@@ -1091,8 +1353,17 @@ export type Database = {
           track_id: string
         }[]
       }
+      finish_challenges: { Args: never; Returns: number }
       has_role: { Args: { p_role: string }; Returns: boolean }
       is_active_track: { Args: { p_track: string }; Returns: boolean }
+      is_blocked: {
+        Args: { p_blocked: string; p_blocker: string }
+        Returns: boolean
+      }
+      is_challenge_beatmaker: {
+        Args: { p_artist: string; p_track: string }
+        Returns: boolean
+      }
       is_open_opportunity: { Args: { p_opp: string }; Returns: boolean }
       my_matches: {
         Args: never
@@ -1104,6 +1375,18 @@ export type Database = {
           other_id: string
           scout_id: string
         }[]
+      }
+      notify: {
+        Args: {
+          p_actor?: string
+          p_data?: Json
+          p_dedupe?: string
+          p_entity?: string
+          p_track?: string
+          p_type: string
+          p_user: string
+        }
+        Returns: undefined
       }
       period_start: {
         Args: { p_at?: string; p_period: string }
@@ -1138,6 +1421,11 @@ export type Database = {
         }[]
       }
       record_profile_view: { Args: { p_profile: string }; Returns: undefined }
+      require_admin: { Args: never; Returns: undefined }
+      resolve_report: {
+        Args: { p_report: string; p_status: string }
+        Returns: undefined
+      }
       review_application: {
         Args: { p_artist: string; p_opp: string; p_status: string }
         Returns: undefined
@@ -1170,6 +1458,7 @@ export type Database = {
           open_to_discovery: boolean
           role: string
           socials: Json
+          suspended_at: string | null
           username: string
         }[]
         SetofOptions: {
@@ -1185,6 +1474,8 @@ export type Database = {
         Returns: {
           artist_id: string
           audio_path: string
+          challenge_candidate: boolean
+          challenge_id: string | null
           comments_enabled: boolean
           cover_path: string | null
           created_at: string
@@ -1210,8 +1501,29 @@ export type Database = {
         }
       }
       send_interest: { Args: { p_artist: string }; Returns: undefined }
+      set_editor_pick: {
+        Args: { p_note: string; p_track: string }
+        Returns: undefined
+      }
+      set_track_status: {
+        Args: { p_status: string; p_track: string }
+        Returns: undefined
+      }
       start_play: { Args: { p_track: string }; Returns: undefined }
+      suspend_user: {
+        Args: { p_on: boolean; p_user: string }
+        Returns: undefined
+      }
+      suspicious_vote_clusters: {
+        Args: never
+        Returns: {
+          ip: string
+          users: string[]
+          votes: number
+        }[]
+      }
       tr_today: { Args: never; Returns: string }
+      void_votes: { Args: { p_user: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
