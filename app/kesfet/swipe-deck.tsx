@@ -9,6 +9,7 @@ import { EmptyState } from "@/app/components/notice";
 import { usePlayer } from "@/app/components/player";
 import { genreLabel, toPlayerTrack } from "@/app/components/track-row";
 import { VoteButton } from "@/app/components/vote-button";
+import { FavoriteButton, InterestButton } from "@/app/components/interactions";
 import { CARD_SELECT, type DeckCard, type DiscoverFilters, feedArgs, swipeDecision, toCards } from "@/lib/discover";
 import { cityName, labelOf, MOODS, TAGS } from "@/lib/music";
 import { createClient } from "@/lib/supabase/client";
@@ -22,10 +23,12 @@ export function SwipeDeck({
   initial,
   filters,
   viewerId,
+  viewerRole = null,
 }: {
   initial: DeckCard[];
   filters: DiscoverFilters;
   viewerId: string | null;
+  viewerRole?: string | null;
 }) {
   const router = useRouter();
   const player = usePlayer();
@@ -224,7 +227,13 @@ export function SwipeDeck({
         </button>
       </div>
 
-      {isCurrent && <VoteButton key={card.id} trackId={card.id} viewerId={viewerId} isOwner={false} listened={false} voted={false} />}
+      {viewerRole === "scout" && (
+        <div className="flex flex-wrap items-start justify-center gap-3">
+          <FavoriteButton key={`f${card.artist.id}`} artistId={card.artist.id} viewerId={viewerId} favorited={false} />
+          <InterestButton key={`i${card.artist.id}`} artistId={card.artist.id} status={null} open />
+        </div>
+      )}
+      {isCurrent && viewerRole !== "scout" && <VoteButton key={card.id} trackId={card.id} viewerId={viewerId} isOwner={false} listened={false} voted={false} />}
       {!viewerId && (
         <p className="text-center text-xs text-text-muted">
           <Link href="/giris" className="link">Giriş yaparsan</Link> beğenilerin kaydedilir ve geçtiğin parçalar tekrar gelmez.

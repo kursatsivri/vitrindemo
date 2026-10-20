@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Bookmark, Compass, House, LogOut, Pencil, SlidersHorizontal, Trophy, User, Users } from "lucide-react";
+import { BadgeCheck, Bookmark, Briefcase, ChartColumn, Compass, House, LogOut, Pencil, SlidersHorizontal, Trophy, User, Users } from "lucide-react";
 import { useRef } from "react";
 import { signOut } from "@/app/auth/actions";
 
@@ -17,6 +17,7 @@ const LINKS = [
   { href: "/", label: "Ana sayfa", icon: House, auth: false },
   { href: "/kesfet", label: "Keşfet", icon: Compass, auth: false },
   { href: "/siralama", label: "Sıralama", icon: Trophy, auth: false },
+  { href: "/firsatlar", label: "Fırsatlar", icon: Briefcase, auth: false },
   { href: "/?akis=takip", label: "Takip ettiklerin", icon: Users, auth: true },
   { href: "/profil/kaydedilenler", label: "Kaydedilenler", icon: Bookmark, auth: true },
 ];
@@ -43,7 +44,16 @@ export function NavLinks({ loggedIn = true }: { loggedIn?: boolean }) {
 const item = "flex h-11 items-center gap-3 rounded-[10px] px-3 text-sm transition duration-150 hover:bg-border";
 
 // Avatar menüsü: tarayıcının popover'ı (dışarı tıklayınca / Esc ile kapanır). Linke basınca da kapanır.
-export function AccountMenu({ username, name, children }: { username: string; name: string; children: React.ReactNode }) {
+// Role göre panel linki: sanatçı paneli, keşifçi paneli/başvurusu, yönetici onayları.
+const ROLE_LINKS: Record<string, { href: string; label: string; icon: typeof User }> = {
+  artist: { href: "/profil/panel", label: "Sanatçı paneli", icon: ChartColumn },
+  scout: { href: "/kesifci", label: "Keşifçi paneli", icon: BadgeCheck },
+  listener: { href: "/kesifci", label: "Keşifçi ol", icon: BadgeCheck },
+  admin: { href: "/admin/kesifciler", label: "Keşifçi başvuruları", icon: BadgeCheck },
+};
+
+export function AccountMenu({ username, name, role, children }: { username: string; name: string; role: string; children: React.ReactNode }) {
+  const roleLink = ROLE_LINKS[role];
   const menu = useRef<HTMLDivElement>(null);
   const close = () => menu.current?.hidePopover();
   return (
@@ -65,6 +75,12 @@ export function AccountMenu({ username, name, children }: { username: string; na
           <User aria-hidden className="size-[18px]" strokeWidth={1.75} />
           Profilim
         </Link>
+        {roleLink && (
+          <Link href={roleLink.href} onClick={close} className={item}>
+            <roleLink.icon aria-hidden className="size-[18px]" strokeWidth={1.75} />
+            {roleLink.label}
+          </Link>
+        )}
         {LINKS.slice(1).map((l) => (
           <Link key={l.href} href={l.href} onClick={close} className={`${item} md:hidden`}>
             <l.icon aria-hidden className="size-[18px]" strokeWidth={1.75} />

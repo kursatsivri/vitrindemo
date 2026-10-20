@@ -34,7 +34,7 @@ export function feedArgs(f: DiscoverFilters, limit: number) {
 }
 
 export const CARD_SELECT =
-  "id, title, genre, tags, moods, hook_sec, cover_path, duration_sec, audio_path, status, profiles!artist_id(username, display_name, city)";
+  "id, title, genre, tags, moods, hook_sec, cover_path, duration_sec, audio_path, status, profiles!artist_id(id, username, display_name, city)";
 
 type CardRow = {
   id: string;
@@ -47,10 +47,10 @@ type CardRow = {
   duration_sec: number | null;
   audio_path: string;
   status: string;
-  profiles: { username: string; display_name: string | null; city: number | null } | null;
+  profiles: { id: string; username: string; display_name: string | null; city: number | null } | null;
 };
 
-export type DeckCard = Omit<CardRow, "profiles"> & { artist: { name: string; username: string; city: number | null } };
+export type DeckCard = Omit<CardRow, "profiles"> & { artist: { id: string; name: string; username: string; city: number | null } };
 
 // Parça satırlarını akış sırasına dizer (in() sırayı korumaz), sanatçısı olmayanı atar.
 export function toCards(order: string[], rows: CardRow[]): DeckCard[] {
@@ -59,6 +59,6 @@ export function toCards(order: string[], rows: CardRow[]): DeckCard[] {
     const r = byId.get(id);
     if (!r?.profiles) return [];
     const { profiles: p, ...track } = r;
-    return [{ ...track, artist: { name: p.display_name || p.username, username: p.username, city: p.city } }];
+    return [{ ...track, artist: { id: p.id, name: p.display_name || p.username, username: p.username, city: p.city } }];
   });
 }

@@ -60,6 +60,9 @@ export default function Page() {
       <p className="-mt-1 text-center text-sm text-text-muted">
         Hesabın var mı? <Link href="/giris" className="link">Giriş yap</Link>
       </p>
+      <p className="text-center text-xs text-text-muted">
+        Yapımcı, plak şirketi ya da menajer misin? Dinleyici hesabı aç, sonra menüden “Keşifçi ol” ile başvur.
+      </p>
     </AuthCard>
   );
 }
