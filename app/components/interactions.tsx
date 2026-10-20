@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Heart, Send, Star } from "lucide-react";
+import { Ban, Bookmark, Heart, Send, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -157,5 +157,35 @@ export function InterestButton({ artistId, status, open }: { artistId: string; s
       </button>
       {error && <span role="alert" className="text-xs text-danger">{error}</span>}
     </span>
+  );
+}
+
+// Engelle: engellenen sana yorum yapamaz, seni takip edemez, ilgi/başvuru gönderemez, bildirim üretmez.
+export function BlockButton({ profileId, viewerId, blocked }: { profileId: string; viewerId: string | null; blocked: boolean }) {
+  const db = createClient();
+  const router = useRouter();
+  const block = useToggle(
+    blocked,
+    viewerId,
+    async () => {
+      const r = await db.from("blocks").insert({ blocker_id: viewerId!, blocked_id: profileId });
+      router.refresh();
+      return r;
+    },
+    async () => {
+      const r = await db.from("blocks").delete().eq("blocker_id", viewerId!).eq("blocked_id", profileId);
+      router.refresh();
+      return r;
+    },
+  );
+  return (
+    <button
+      type="button"
+      onClick={() => (block.on || confirm("Engellensin mi? Seni takip edemez, parçalarına yorum yapamaz.")) && block.toggle()}
+      className="btn-ghost text-text-muted"
+    >
+      <Ban aria-hidden className="size-4" strokeWidth={1.75} />
+      {block.on ? "Engeli kaldır" : "Engelle"}
+    </button>
   );
 }

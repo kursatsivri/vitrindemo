@@ -10,6 +10,7 @@ import { PlayButton } from "@/app/components/player";
 import { BestRank } from "@/app/components/ranking";
 import { RatingPanel } from "@/app/components/rating-panel";
 import { ShareButton } from "@/app/components/share-button";
+import { ReportButton } from "@/app/components/report-button";
 import { toPlayerTrack } from "@/app/components/track-row";
 import { VoteButton } from "@/app/components/vote-button";
 import { Waveform } from "@/app/components/waveform";
@@ -85,11 +86,14 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
           supabase.from("ratings").select("s1, s2, s3, s4").eq("track_id", track.id).maybeSingle(),
           supabase.from("plays").select("day").eq("track_id", track.id).not("counted_at", "is", null).limit(1),
           supabase.from("votes").select("track_id").eq("track_id", track.id).eq("week_start", periodStart("week")).maybeSingle(),
+          supabase.from("blocks").select("blocked_id"),
         ])
       : null,
   ]);
   // RLS: saves/ratings/plays/votes sadece kendi satırlarını döndürür.
-  const [liked, saved, myRating, listened, myVote] = mine ?? [null, null, null, null, null];
+  const [liked, saved, myRating, listened, myVote, myBlocks] = mine ?? [null, null, null, null, null, null];
+  // Engellediğin kişilerin yorumları sana görünmez
+  const blocked = new Set((myBlocks?.data ?? []).map((b) => b.blocked_id));
 
   const name = artist.display_name || artist.username;
   const playerTrack = toPlayerTrack(track, { name, username: artist.username });
@@ -153,6 +157,7 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
 
       <div className="flex flex-wrap items-center gap-2">
         <ShareButton title={`${track.title} — ${name}`} />
+        {!isOwner && viewerId && <ReportButton targetType="track" targetId={track.id} viewerId={viewerId} />}
         <LikeSaveButtons
           trackId={track.id}
           viewerId={viewerId}
@@ -223,7 +228,7 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
         ownerId={track.artist_id}
         enabled={track.comments_enabled}
         comments={(comments.data ?? []).flatMap((c) =>
-          c.profiles
+          c.profiles && !blocked.has(c.author_id)
             ? [{ id: c.id, body: c.body, atSec: c.at_sec, ago: timeAgo(c.created_at), authorId: c.author_id, author: c.profiles }]
             : [],
         )}
