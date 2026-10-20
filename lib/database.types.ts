@@ -166,6 +166,48 @@ export type Database = {
           },
         ]
       }
+      interests: {
+        Row: {
+          answered_at: string | null
+          artist_id: string
+          created_at: string
+          scout_id: string
+          source: string
+          status: string
+        }
+        Insert: {
+          answered_at?: string | null
+          artist_id: string
+          created_at?: string
+          scout_id: string
+          source?: string
+          status?: string
+        }
+        Update: {
+          answered_at?: string | null
+          artist_id?: string
+          created_at?: string
+          scout_id?: string
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interests_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interests_scout_id_fkey"
+            columns: ["scout_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string
@@ -195,6 +237,102 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunities: {
+        Row: {
+          body: string
+          city: number | null
+          closed: boolean
+          created_at: string
+          deadline: string
+          genre: string | null
+          id: string
+          scout_id: string
+          seeking: string
+          title: string
+        }
+        Insert: {
+          body: string
+          city?: number | null
+          closed?: boolean
+          created_at?: string
+          deadline: string
+          genre?: string | null
+          id?: string
+          scout_id: string
+          seeking: string
+          title: string
+        }
+        Update: {
+          body?: string
+          city?: number | null
+          closed?: boolean
+          created_at?: string
+          deadline?: string
+          genre?: string | null
+          id?: string
+          scout_id?: string
+          seeking?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_scout_id_fkey"
+            columns: ["scout_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_applications: {
+        Row: {
+          artist_id: string
+          created_at: string
+          note: string | null
+          opportunity_id: string
+          status: string
+          track_id: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          note?: string | null
+          opportunity_id: string
+          status?: string
+          track_id: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          note?: string | null
+          opportunity_id?: string
+          status?: string
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_applications_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_applications_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
             referencedColumns: ["id"]
           },
         ]
@@ -232,6 +370,39 @@ export type Database = {
           {
             foreignKeyName: "plays_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_views: {
+        Row: {
+          day: string
+          profile_id: string
+          viewer_id: string
+        }
+        Insert: {
+          day: string
+          profile_id: string
+          viewer_id: string
+        }
+        Update: {
+          day?: string
+          profile_id?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_views_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_views_viewer_id_fkey"
+            columns: ["viewer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -420,6 +591,124 @@ export type Database = {
           {
             foreignKeyName: "saves_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scout_alerts: {
+        Row: {
+          city: number | null
+          created_at: string
+          genre: string | null
+          id: string
+          min_week_votes: number
+          scout_id: string
+        }
+        Insert: {
+          city?: number | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          min_week_votes?: number
+          scout_id: string
+        }
+        Update: {
+          city?: number | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          min_week_votes?: number
+          scout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scout_alerts_scout_id_fkey"
+            columns: ["scout_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scout_applications: {
+        Row: {
+          about: string
+          contact_email: string
+          contact_person: string
+          created_at: string
+          kind: string
+          org_name: string
+          reviewed_at: string | null
+          status: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          about: string
+          contact_email: string
+          contact_person: string
+          created_at?: string
+          kind: string
+          org_name: string
+          reviewed_at?: string | null
+          status?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          about?: string
+          contact_email?: string
+          contact_person?: string
+          created_at?: string
+          kind?: string
+          org_name?: string
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scout_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scout_favorites: {
+        Row: {
+          artist_id: string
+          created_at: string
+          note: string | null
+          scout_id: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          note?: string | null
+          scout_id: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          note?: string | null
+          scout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scout_favorites_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scout_favorites_scout_id_fkey"
+            columns: ["scout_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -686,6 +975,35 @@ export type Database = {
         }
         Relationships: []
       }
+      scout_profiles: {
+        Row: {
+          kind: string | null
+          org_name: string | null
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          kind?: string | null
+          org_name?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          kind?: string | null
+          org_name?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scout_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       track_vote_totals: {
         Row: {
           track_id: string | null
@@ -703,7 +1021,46 @@ export type Database = {
       }
     }
     Functions: {
+      alert_matches: {
+        Args: never
+        Returns: {
+          alert_id: string
+          artist_id: string
+          score: number
+          track_id: string
+        }[]
+      }
+      answer_interest: {
+        Args: { p_accept: boolean; p_scout: string }
+        Returns: undefined
+      }
+      apply_scout: {
+        Args: {
+          p_about: string
+          p_contact_email: string
+          p_contact_person: string
+          p_kind: string
+          p_org_name: string
+          p_website: string
+        }
+        Returns: undefined
+      }
+      approve_scout: {
+        Args: { p_approve: boolean; p_user: string }
+        Returns: undefined
+      }
       archive_finished_periods: { Args: never; Returns: number }
+      artist_stats: {
+        Args: never
+        Returns: {
+          followers: number
+          likes: number
+          plays: number
+          saves: number
+          scout_views_week: number
+          votes: number
+        }[]
+      }
       can_rate: { Args: { p_track: string }; Returns: boolean }
       cast_vote: { Args: { p_track: string }; Returns: boolean }
       compute_ranking: {
@@ -734,7 +1091,20 @@ export type Database = {
           track_id: string
         }[]
       }
+      has_role: { Args: { p_role: string }; Returns: boolean }
       is_active_track: { Args: { p_track: string }; Returns: boolean }
+      is_open_opportunity: { Args: { p_opp: string }; Returns: boolean }
+      my_matches: {
+        Args: never
+        Returns: {
+          artist_id: string
+          contact_person: string
+          email: string
+          matched_at: string
+          other_id: string
+          scout_id: string
+        }[]
+      }
       period_start: {
         Args: { p_at?: string; p_period: string }
         Returns: string
@@ -765,6 +1135,25 @@ export type Database = {
           a3: number
           a4: number
           n: number
+        }[]
+      }
+      record_profile_view: { Args: { p_profile: string }; Returns: undefined }
+      review_application: {
+        Args: { p_artist: string; p_opp: string; p_status: string }
+        Returns: undefined
+      }
+      scout_search: {
+        Args: {
+          p_city?: number
+          p_genre?: string
+          p_min_votes?: number
+          p_open_only?: boolean
+          p_sort?: string
+        }
+        Returns: {
+          artist_id: string
+          total_votes: number
+          week_votes: number
         }[]
       }
       search_artists: {
@@ -820,7 +1209,9 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      send_interest: { Args: { p_artist: string }; Returns: undefined }
       start_play: { Args: { p_track: string }; Returns: undefined }
+      tr_today: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never

@@ -53,9 +53,10 @@ async function Deck({ searchParams }: { searchParams: PageProps<"/kesfet">["sear
   const { data: claims } = await supabase.auth.getClaims();
   const viewerId = claims?.claims.sub ?? null;
 
-  const [feed, prefs] = await Promise.all([
+  const [feed, prefs, me] = await Promise.all([
     supabase.rpc("discover_feed", feedArgs(filters, BATCH)),
     viewerId ? supabase.from("user_preferences").select("user_id").maybeSingle() : null,
+    viewerId ? supabase.from("profiles").select("role").eq("id", viewerId).single() : null,
   ]);
   if (feed.error) throw new Error(`Keşfet yüklenemedi: ${feed.error.message}`);
   const ids = feed.data.map((r) => r.track_id);
@@ -74,7 +75,7 @@ async function Deck({ searchParams }: { searchParams: PageProps<"/kesfet">["sear
       )}
       <Filters f={filters} />
       {/* Filtre değişince deste baştan kurulur */}
-      <SwipeDeck key={JSON.stringify(filters)} initial={toCards(ids, rows ?? [])} filters={filters} viewerId={viewerId} />
+      <SwipeDeck key={JSON.stringify(filters)} initial={toCards(ids, rows ?? [])} filters={filters} viewerId={viewerId} viewerRole={me?.data?.role ?? null} />
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Heart } from "lucide-react";
+import { Bookmark, Heart, Send, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -103,5 +103,59 @@ export function FollowButton({
         <span className="font-medium text-text tabular-nums">{count}</span> takipçi
       </span>
     </div>
+  );
+}
+
+// ── Keşifçi butonları (sadece onaylı keşifçiye gösterilir; kurallar DB'de) ──
+export function FavoriteButton({ artistId, viewerId, favorited }: { artistId: string; viewerId: string | null; favorited: boolean }) {
+  const db = createClient();
+  const fav = useToggle(
+    favorited,
+    viewerId,
+    () => db.from("scout_favorites").upsert({ scout_id: viewerId!, artist_id: artistId }, { onConflict: "scout_id,artist_id", ignoreDuplicates: true }),
+    () => db.from("scout_favorites").delete().eq("scout_id", viewerId!).eq("artist_id", artistId),
+  );
+  return (
+    <button type="button" onClick={fav.toggle} aria-pressed={fav.on} className={iconButton}>
+      <Star aria-hidden className="size-[18px]" fill={fav.on ? "currentColor" : "none"} strokeWidth={1.75} />
+      {fav.on ? "Favorilerde" : "Favorile"}
+    </button>
+  );
+}
+
+const INTEREST_LABELS: Record<string, string> = { pending: "İlgi gönderildi", accepted: "Eşleştiniz", declined: "İlgi reddedildi" };
+
+// İlgi gönderilince geri alınamaz; reddedilen tekrar gönderilemez.
+export function InterestButton({ artistId, status, open }: { artistId: string; status: string | null; open: boolean }) {
+  const [state, setState] = useState(status);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function send() {
+    setBusy(true);
+    setError(null);
+    const { error } = await createClient().rpc("send_interest", { p_artist: artistId });
+    setBusy(false);
+    if (error) setError(error.code === "P0001" ? error.message : "Gönderilemedi. Lütfen tekrar dene.");
+    else setState("pending");
+  }
+
+  if (state) {
+    return (
+      <span className={`${iconButton} pointer-events-none ${state === "accepted" ? "border-accent/45 text-accent" : "text-text-muted"}`}>
+        <Send aria-hidden className="size-[18px]" strokeWidth={1.75} />
+        {INTEREST_LABELS[state]}
+      </span>
+    );
+  }
+  if (!open) return <span className="text-xs text-text-muted">Şu an ilgi almıyor</span>;
+  return (
+    <span className="flex flex-col items-center gap-1">
+      <button type="button" onClick={send} disabled={busy} className="btn-primary">
+        <Send aria-hidden className="size-[18px]" strokeWidth={1.75} />
+        {busy ? "Gönderiliyor…" : "İlgi gönder"}
+      </button>
+      {error && <span role="alert" className="text-xs text-danger">{error}</span>}
+    </span>
   );
 }

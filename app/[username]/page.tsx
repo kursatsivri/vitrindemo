@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Camera, Check, Cloud, ExternalLink, MonitorPlay, Music } from "lucide-react";
+import { BadgeCheck, Camera, Check, Cloud, ExternalLink, MonitorPlay, Music } from "lucide-react";
 import { Suspense } from "react";
 import { Avatar } from "@/app/components/avatar";
-import { FollowButton } from "@/app/components/interactions";
+import { FavoriteButton, FollowButton, InterestButton } from "@/app/components/interactions";
+import { ActionForm } from "@/app/components/action-form";
+import { TextArea } from "@/app/components/field";
+import { saveNote } from "@/app/kesifci/actions";
 import { EmptyState } from "@/app/components/notice";
 import { BestRank } from "@/app/components/ranking";
 import { TrackQueue } from "@/app/components/player";
@@ -37,7 +40,7 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
   const isOwner = viewerId === profile.id;
   const isArtist = profile.role === "artist";
 
-  const [{ count: followers }, { count: following }, { data: myFollow }, { data: best }] = await Promise.all([
+  const [{ count: followers }, { count: following }, { data: myFollow }, { data: best }, viewer, scoutOrg] = await Promise.all([
     supabase.from("follows").select("*", { count: "exact", head: true }).eq("followee_id", profile.id),
     supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", profile.id),
     viewerId && !isOwner
@@ -50,7 +53,18 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
       .order("rank_genre")
       .limit(1)
       .maybeSingle(),
+    viewerId && !isOwner ? supabase.from("profiles").select("role").eq("id", viewerId).single() : null,
+    profile.role === "scout" ? supabase.from("scout_profiles").select("org_name").eq("user_id", profile.id).maybeSingle() : null,
   ]);
+  // Onaylı keşifçi sanatçı profilinde: görüntüleme sayılır (DB sadece keşifçiyi sayar), favori/not/ilgi araçları açılır.
+  const scoutView = viewer?.data?.role === "scout" && isArtist;
+  const [, fav, interest] = scoutView
+    ? await Promise.all([
+        supabase.rpc("record_profile_view", { p_profile: profile.id }),
+        supabase.from("scout_favorites").select("note").eq("artist_id", profile.id).maybeSingle(),
+        supabase.from("interests").select("status").eq("scout_id", viewerId!).eq("artist_id", profile.id).maybeSingle(),
+      ])
+    : [];
 
   // Gizlenen parçaları RLS sadece sahibine döndürür.
   const { data: tracks, error } = isArtist
@@ -96,8 +110,10 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
           <Avatar path={profile.avatar_path} name={name} size={168} className="size-28! border-4 border-bg md:size-[168px]! md:border-[5px]" />
           <div className="flex min-w-0 flex-col items-center gap-3 md:flex-1 md:items-start md:pb-2">
             <div className="flex flex-wrap justify-center gap-2">
-              <span className="inline-flex h-7 items-center rounded-full bg-accent-soft px-3 text-xs font-medium tracking-wide text-accent">
+              <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-accent-soft px-3 text-xs font-medium tracking-wide text-accent">
+                {profile.role === "scout" && <BadgeCheck aria-hidden className="size-3.5" strokeWidth={2} />}
                 {ROLE_LABELS[profile.role]}
+                {scoutOrg?.data?.org_name && <> · {scoutOrg.data.org_name}</>}
               </span>
               {isArtist && profile.open_to_discovery && (
                 <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-bg/40 px-3 text-xs font-medium">
@@ -139,6 +155,24 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
             <ShareButton title={`${name} — Vitrin`} iconOnly />
           </div>
         </header>
+
+        {scoutView && (
+          <section aria-label="Keşifçi araçları" className="card flex flex-col gap-4 p-4 md:p-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <FavoriteButton artistId={profile.id} viewerId={viewerId} favorited={!!fav?.data} />
+              <InterestButton artistId={profile.id} status={interest?.data?.status ?? null} open={profile.open_to_discovery} />
+            </div>
+            <details open={!!fav?.data?.note}>
+              <summary className="cursor-pointer text-sm text-text-muted">Özel not (sadece sen görürsün)</summary>
+              <div className="mt-3">
+                <ActionForm action={saveNote} submitLabel="Notu kaydet">
+                  <input type="hidden" name="artist_id" value={profile.id} />
+                  <TextArea label="Not" name="note" defaultValue={fav?.data?.note ?? ""} maxLength={1000} rows={3} />
+                </ActionForm>
+              </div>
+            </details>
+          </section>
+        )}
 
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
           {hasAside && (

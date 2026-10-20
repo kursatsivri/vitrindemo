@@ -33,3 +33,9 @@ test("readOpportunity: son tarih bugün ile 90 gün sonrası arasında", () => {
   assert.ok("error" in readOpportunity(form({ ...ok, seeking: "dj" }), "2026-10-20"));
   assert.ok("error" in readOpportunity(form({ ...ok, city: "82" }), "2026-10-20"));
 });
+
+test("trToday: Türkiye gece yarısı", async () => {
+  const { trToday } = await import("./scouts.ts");
+  assert.equal(trToday(new Date("2026-10-20T21:30:00Z")), "2026-10-21");
+  assert.equal(trToday(new Date("2026-10-20T20:59:00Z")), "2026-10-20");
+});

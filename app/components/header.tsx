@@ -64,7 +64,7 @@ async function UserNav() {
           </>
         )}
         {profile && (
-          <AccountMenu username={profile.username} name={name}>
+          <AccountMenu username={profile.username} name={name} role={profile.role}>
             <Avatar path={profile.avatar_path} name={name} size={40} className="border border-border" />
           </AccountMenu>
         )}

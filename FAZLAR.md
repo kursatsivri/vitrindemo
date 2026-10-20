@@ -14,7 +14,7 @@ Toplam **10 faz** (0–9). Her faz: çalıştırılır → test edilir → GitHu
 | 3 | Türler, parça sayfası, beğeni, kaydet, takip, yorum, geri bildirim | ✅ Bitti |
 | 4 | Oylama, sıralamalar, erken keşifçi puanı | ✅ Bitti |
 | 5 | Keşfet modu (kaydırma), öneriler, yakınındaki yetenekler | 🔍 Kod bitti, test bekliyor |
-| 6 | Keşifçi tarafı, eşleşme, fırsat panosu | ⏳ Sırada |
+| 6 | Keşifçi tarafı, eşleşme, fırsat panosu | 🔍 Kod bitti, test bekliyor |
 | 7 | Bildirimler, şikayet, yönetici paneli, haftalık challenge | ⏳ |
 | 8 | Canlıya çıkış | ⏳ |
 | 9 | Premium üyelik ve mesajlaşma | ⏳ (şirket kaydından sonra) |
@@ -80,7 +80,7 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - **Arama:** sanatçı ve parça
 - **Yakınındaki yetenekler:** Türkiye haritası (81 il) — ile tıkla, o şehrin sanatçıları ve şehir sıralaması
 
-## Faz 6 — Keşifçi tarafı ve eşleşme ⏳
+## Faz 6 — Keşifçi tarafı ve eşleşme 🔍 (kod bitti, test bekliyor)
 - **Keşifçi** hesabı (yapımcı / plak şirketi / menajer): başvuru → yönetici onayı → "Onaylı Keşifçi" rozeti
 - Keşfet modunda "Favorile" ve "İlgi gönder" butonları
 - **İlgi → eşleşme:** sanatçı kabul ederse iletişim bilgileri iki tarafa açılır (Tinder'ın "match"i)
@@ -89,6 +89,8 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - **Yetenek alarmı:** kriterlere uyan biri yükselince haber ver
 - Sanatçıya istatistik: dinlenme, beğeni, kaydetme, oy, takipçi, **"Profilini bu hafta X keşifçi görüntüledi"**
 - **Fırsat panosu:** keşifçiler ilan açar ("Drill rapçi arıyorum", "Açık sahne için sanatçı"), sanatçılar bir parçasıyla başvurur; keşifçi dinler, kısa listeye alır, eşleşme başlatır. Ücretsiz.
+- **Kararlar (20 Ekim 2026):** başvuruyu sadece dinleyici hesabı yapar, onaylanınca hesap "Onaylı Keşifçi" olur · onay şimdilik küçük `/admin/kesifciler` sayfasından (Faz 7'de tam panel) · ilan başvurusundan "Eşleş" denince iletişim hemen açılır (sanatçı başvurarak onay vermiş sayılır) · ilgi sadece "keşfedilmeye açık" sanatçıya, günde en fazla 20 · yetenek alarmı şimdilik keşifçi panelinde liste, bildirim Faz 7'de
+- **Sayfalar:** `/kesifci` (başvuru / keşifçi paneli), `/kesifci/ara`, `/profil/panel` (sanatçı paneli), `/firsatlar`, `/firsatlar/[id]`, `/admin/kesifciler`
 
 ## Faz 7 — Bildirimler, güvenlik ve challenge ⏳
 - **Bildirim merkezi:** takipçi, beğeni, yorum, "ilk 10'a girdin", ilgi/eşleşme, takip ettiğin sanatçının yeni parçası

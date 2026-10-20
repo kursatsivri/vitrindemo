@@ -89,3 +89,15 @@ export function readOpportunity(f: FormData, today: string): Opportunity | { err
   if (o.body.length < 10 || o.body.length > 1000) return { error: "Açıklama 10–1000 karakter olmalı." };
   return o;
 }
+
+// Türkiye takvimiyle bugün (YYYY-MM-DD)
+export function trToday(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(now);
+}
+
+// DB kural hataları (P0001) Türkçe mesaj taşır; diğerleri genel mesaja düşer.
+export function dbMessage(error: { code?: string; message: string }, fallback = "İşlem yapılamadı. Lütfen tekrar dene.") {
+  if (error.code === "P0001") return error.message;
+  if (error.code === "23505") return "Bunu zaten yaptın.";
+  return fallback;
+}

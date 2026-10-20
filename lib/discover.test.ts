@@ -20,14 +20,14 @@ test("readFilters: liste dışı değerler atılır", () => {
 });
 
 test("toCards: akış sırası korunur, sanatçısız satır atılır", () => {
-  const row = (id: string, profiles: { username: string; display_name: string | null; city: number | null } | null) => ({
+  const row = (id: string, profiles: { id: string; username: string; display_name: string | null; city: number | null } | null) => ({
     id, title: id, genre: "rap", tags: [], moods: [], hook_sec: 0, cover_path: null,
     duration_sec: null, audio_path: `${id}.mp3`, status: "active", profiles,
   });
   const cards = toCards(["b", "x", "a", "c"], [
-    row("a", { username: "ali", display_name: null, city: 6 }),
-    row("b", { username: "bek", display_name: "Bek", city: null }),
+    row("a", { id: "pa", username: "ali", display_name: null, city: 6 }),
+    row("b", { id: "pb", username: "bek", display_name: "Bek", city: null }),
     row("c", null),
   ]);
-  assert.deepEqual(cards.map((c) => [c.id, c.artist.name]), [["b", "Bek"], ["a", "ali"]]);
+  assert.deepEqual(cards.map((c) => [c.id, c.artist.name, c.artist.id]), [["b", "Bek", "pb"], ["a", "ali", "pa"]]);
 });
