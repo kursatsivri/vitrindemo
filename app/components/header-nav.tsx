@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Bookmark, House, LogOut, Pencil, User, Users } from "lucide-react";
+import { Bookmark, House, LogOut, Pencil, Trophy, User, Users } from "lucide-react";
 import { useRef } from "react";
 import { signOut } from "@/app/auth/actions";
 
@@ -15,6 +15,7 @@ function useActive() {
 
 const LINKS = [
   { href: "/", label: "Ana sayfa", icon: House },
+  { href: "/siralama", label: "Sıralama", icon: Trophy },
   { href: "/?akis=takip", label: "Takip ettiklerin", icon: Users },
   { href: "/profil/kaydedilenler", label: "Kaydedilenler", icon: Bookmark },
 ];

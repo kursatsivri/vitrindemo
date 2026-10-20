@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Avatar } from "@/app/components/avatar";
 import { FollowButton } from "@/app/components/interactions";
 import { EmptyState } from "@/app/components/notice";
+import { BestRank } from "@/app/components/ranking";
 import { TrackQueue } from "@/app/components/player";
 import { ShareButton } from "@/app/components/share-button";
 import { ListSkeleton, toPlayerTrack, TrackRow } from "@/app/components/track-row";
@@ -36,12 +37,19 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
   const isOwner = viewerId === profile.id;
   const isArtist = profile.role === "artist";
 
-  const [{ count: followers }, { count: following }, { data: myFollow }] = await Promise.all([
+  const [{ count: followers }, { count: following }, { data: myFollow }, { data: best }] = await Promise.all([
     supabase.from("follows").select("*", { count: "exact", head: true }).eq("followee_id", profile.id),
     supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", profile.id),
     viewerId && !isOwner
       ? supabase.from("follows").select("followee_id").eq("follower_id", viewerId).eq("followee_id", profile.id).maybeSingle()
       : Promise.resolve({ data: null }),
+    supabase
+      .from("ranking_snapshots")
+      .select("rank_genre, genre, period")
+      .eq("artist_id", profile.id)
+      .order("rank_genre")
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   // Gizlenen parçaları RLS sadece sahibine döndürür.
@@ -53,6 +61,11 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
         .order("created_at", { ascending: false })
     : { data: [], error: null };
   if (error) throw new Error(`Parçalar yüklenemedi: ${error.message}`);
+  // Toplam sayılan oy: sanatçının parçalarının oy toplamı
+  const { data: totals } = tracks?.length
+    ? await supabase.from("track_vote_totals").select("votes").in("track_id", tracks.map((t) => t.id))
+    : { data: [] };
+  const votes = (totals ?? []).reduce((sum, t) => sum + (t.votes ?? 0), 0);
   // Öne çıkan parça listenin başında
   const ordered = [...(tracks ?? [])].sort(
     (x, y) => Number(y.id === profile.featured_track_id) - Number(x.id === profile.featured_track_id),
@@ -92,6 +105,7 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
                   Keşfedilmeye açık
                 </span>
               )}
+              <BestRank best={best} />
             </div>
             <h1 className="max-w-full font-display text-[42px] leading-none font-extrabold tracking-[-0.04em] break-words md:text-[clamp(48px,7vw,96px)] md:leading-[0.92] md:tracking-[-0.05em]">
               {name}
@@ -117,6 +131,11 @@ async function Profile({ params }: { params: PageProps<"/[username]">["params"] 
             <span className="text-sm text-text-muted">
               <span className="font-medium text-text tabular-nums">{following ?? 0}</span> takip
             </span>
+            {isArtist && (
+              <span className="text-sm text-text-muted">
+                <span className="font-medium text-text tabular-nums">{votes}</span> oy
+              </span>
+            )}
             <ShareButton title={`${name} — Vitrin`} iconOnly />
           </div>
         </header>

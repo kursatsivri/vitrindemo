@@ -91,6 +91,48 @@ export type Database = {
           },
         ]
       }
+      ear_points: {
+        Row: {
+          awarded_at: string
+          period: string
+          period_start: string
+          points: number
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          period: string
+          period_start: string
+          points: number
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          period?: string
+          period_start?: string
+          points?: number
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ear_points_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ear_points_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -243,6 +285,63 @@ export type Database = {
           {
             foreignKeyName: "profiles_featured_track_id_fkey"
             columns: ["featured_track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_snapshots: {
+        Row: {
+          artist_id: string
+          city: number | null
+          genre: string
+          last_vote_at: string
+          period: string
+          period_start: string
+          rank_all: number
+          rank_city: number | null
+          rank_genre: number
+          score: number
+          track_id: string
+        }
+        Insert: {
+          artist_id: string
+          city?: number | null
+          genre: string
+          last_vote_at: string
+          period: string
+          period_start: string
+          rank_all: number
+          rank_city?: number | null
+          rank_genre: number
+          score: number
+          track_id: string
+        }
+        Update: {
+          artist_id?: string
+          city?: number | null
+          genre?: string
+          last_vote_at?: string
+          period?: string
+          period_start?: string
+          rank_all?: number
+          rank_city?: number | null
+          rank_genre?: number
+          score?: number
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_snapshots_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ranking_snapshots_track_id_fkey"
+            columns: ["track_id"]
             isOneToOne: false
             referencedRelation: "tracks"
             referencedColumns: ["id"]
@@ -428,14 +527,154 @@ export type Database = {
           },
         ]
       }
+      votes: {
+        Row: {
+          counts: boolean
+          created_at: string
+          track_id: string
+          voter_id: string
+          votes_before: number
+          week_start: string
+        }
+        Insert: {
+          counts: boolean
+          created_at?: string
+          track_id: string
+          voter_id: string
+          votes_before: number
+          week_start: string
+        }
+        Update: {
+          counts?: boolean
+          created_at?: string
+          track_id?: string
+          voter_id?: string
+          votes_before?: number
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      ear_leaderboard: {
+        Row: {
+          month_start: string | null
+          points: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ear_points_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_live: {
+        Row: {
+          artist_id: string | null
+          city: number | null
+          genre: string | null
+          last_vote_at: string | null
+          period: string | null
+          period_start: string | null
+          rank_all: number | null
+          rank_city: number | null
+          rank_genre: number | null
+          score: number | null
+          track_id: string | null
+        }
+        Relationships: []
+      }
+      rising_live: {
+        Row: {
+          artist_id: string | null
+          city: number | null
+          genre: string | null
+          last_vote_at: string | null
+          rank_all: number | null
+          rank_city: number | null
+          rank_genre: number | null
+          score: number | null
+          track_id: string | null
+        }
+        Relationships: []
+      }
+      track_vote_totals: {
+        Row: {
+          track_id: string | null
+          votes: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      archive_finished_periods: { Args: never; Returns: number }
       can_rate: { Args: { p_track: string }; Returns: boolean }
+      cast_vote: { Args: { p_track: string }; Returns: boolean }
+      compute_ranking: {
+        Args: { p_period: string; p_start: string }
+        Returns: {
+          artist_id: string
+          city: number
+          genre: string
+          last_vote_at: string
+          rank_all: number
+          rank_city: number
+          rank_genre: number
+          score: number
+          track_id: string
+        }[]
+      }
       count_play: { Args: { p_track: string }; Returns: boolean }
       is_active_track: { Args: { p_track: string }; Returns: boolean }
+      period_start: {
+        Args: { p_at?: string; p_period: string }
+        Returns: string
+      }
+      ranking: {
+        Args: {
+          p_city?: number
+          p_genre?: string
+          p_period: string
+          p_start: string
+        }
+        Returns: {
+          archived: boolean
+          artist_id: string
+          city: number
+          genre: string
+          last_vote_at: string
+          rank: number
+          score: number
+          track_id: string
+        }[]
+      }
       rating_summary: {
         Args: { p_track: string }
         Returns: {

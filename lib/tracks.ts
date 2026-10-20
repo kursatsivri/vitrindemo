@@ -15,6 +15,15 @@ export function weekStart(now = new Date()) {
   return new Date(tr.getTime() - 3 * 3600_000);
 }
 
+// Sıralama dönemi başlangıcı (Türkiye takvim günü, "YYYY-MM-DD"): DB'deki period_start() ile aynı.
+// back: kaç dönem geri (arşiv listesi için).
+export function periodStart(period: "week" | "month", now = new Date(), back = 0) {
+  const tr = new Date(now.getTime() + 3 * 3600_000);
+  if (period === "week") tr.setUTCDate(tr.getUTCDate() - ((tr.getUTCDay() + 6) % 7) - 7 * back);
+  else tr.setUTCMonth(tr.getUTCMonth() - back, 1);
+  return tr.toISOString().slice(0, 10);
+}
+
 export function storageUrl(bucket: "tracks" | "covers" | "avatars", path: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
 }
