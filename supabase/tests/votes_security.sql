@@ -16,7 +16,7 @@ insert into auth.users (id, email, raw_user_meta_data) values
 
 -- Kayıt akışı keşifçi/admin açmaz; rolleri doğrudan verilir.
 update public.profiles set created_at = now() - interval '30 days' where id <> '00000000-0000-0000-0000-000000000010';
-update public.profiles set role = 'label' where id = '00000000-0000-0000-0000-000000000011';
+update public.profiles set role = 'scout' where id = '00000000-0000-0000-0000-000000000011';
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-00000000000d';
 update public.profiles set city = 35, created_at = now() - interval '200 days' where id = '00000000-0000-0000-0000-00000000000a';
 

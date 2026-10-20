@@ -4,7 +4,7 @@ export const USERNAME_RE = /^(?!\.)(?!.*\.\.)(?!.*\.$)[a-z0-9_.]{3,20}$/;
 export const ROLE_LABELS: Record<string, string> = {
   listener: "Dinleyici",
   artist: "Sanatçı",
-  label: "Plak şirketi",
+  scout: "Onaylı Keşifçi",
   admin: "Yönetici",
 };
 
