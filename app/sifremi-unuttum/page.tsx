@@ -1,5 +1,6 @@
 import { requestPasswordReset } from "@/app/auth/actions";
 import { ActionForm } from "@/app/components/action-form";
+import { Captcha } from "@/app/components/captcha";
 import { AuthCard } from "@/app/components/auth-card";
 import { Field } from "@/app/components/field";
 
@@ -10,6 +11,7 @@ export default function Page() {
     <AuthCard title="Şifremi unuttum" subtitle="E-postana bir sıfırlama linki gönderelim.">
       <ActionForm action={requestPasswordReset} submitLabel="Sıfırlama linki gönder">
         <Field label="E-posta" name="email" type="email" required autoComplete="email" />
+        <Captcha />
       </ActionForm>
     </AuthCard>
   );

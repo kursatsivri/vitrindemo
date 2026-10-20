@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Check, Headphones, Mic } from "lucide-react";
 import { signUp } from "@/app/auth/actions";
 import { ActionForm } from "@/app/components/action-form";
+import { Captcha } from "@/app/components/captcha";
 import { AuthCard } from "@/app/components/auth-card";
 import { Field } from "@/app/components/field";
 
@@ -56,6 +57,7 @@ export default function Page() {
           autoComplete="new-password"
           hint="En az 8 karakter"
         />
+        <Captcha />
       </ActionForm>
       <p className="-mt-1 text-center text-sm text-text-muted">
         Hesabın var mı? <Link href="/giris" className="link">Giriş yap</Link>
