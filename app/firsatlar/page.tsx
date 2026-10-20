@@ -48,8 +48,8 @@ async function Board({ searchParams }: { searchParams: PageProps<"/firsatlar">["
   const params = await searchParams;
   const { genre, city } = readFilters(params);
   const seeking = SEEKING.some((s) => s.value === params.aranan) ? String(params.aranan) : null;
+  const supabase = await createClient();  // await connection() içerir: tarih bundan sonra okunmalı
   const today = trToday();
-  const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
   const viewerId = claims?.claims.sub ?? null;
 
