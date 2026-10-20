@@ -7,14 +7,16 @@ import { Comments } from "@/app/components/comments";
 import { Cover } from "@/app/components/cover";
 import { LikeSaveButtons } from "@/app/components/interactions";
 import { PlayButton } from "@/app/components/player";
+import { BestRank } from "@/app/components/ranking";
 import { RatingPanel } from "@/app/components/rating-panel";
 import { ShareButton } from "@/app/components/share-button";
 import { toPlayerTrack } from "@/app/components/track-row";
+import { VoteButton } from "@/app/components/vote-button";
 import { Waveform } from "@/app/components/waveform";
 import { GENRES, labelOf, MOODS, ratingCriteria, TAGS, TRACK_LINKS } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
 import { timeAgo } from "@/lib/time";
-import { formatDuration, storageUrl } from "@/lib/tracks";
+import { formatDuration, periodStart, storageUrl } from "@/lib/tracks";
 
 // generateMetadata ve sayfa aynı isteği paylaşır.
 const getTrack = cache(async (id: string) => {
@@ -59,7 +61,7 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
   const isOwner = viewerId === track.artist_id;
 
   // ponytail: son 100 yorum; çok yorumlu parçalarda "daha fazla" ekle.
-  const [{ count: likeCount }, comments, summary, mine] = await Promise.all([
+  const [{ count: likeCount }, comments, summary, totals, best, mine] = await Promise.all([
     supabase.from("likes").select("*", { count: "exact", head: true }).eq("track_id", track.id),
     supabase
       .from("comments")
@@ -68,17 +70,26 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
       .order("created_at", { ascending: false })
       .limit(100),
     supabase.rpc("rating_summary", { p_track: track.id }).single(),
+    supabase.from("track_vote_totals").select("votes").eq("track_id", track.id).maybeSingle(),
+    supabase
+      .from("ranking_snapshots")
+      .select("rank_genre, genre, period")
+      .eq("track_id", track.id)
+      .order("rank_genre")
+      .limit(1)
+      .maybeSingle(),
     viewerId
       ? Promise.all([
           supabase.from("likes").select("track_id").eq("track_id", track.id).eq("user_id", viewerId).maybeSingle(),
           supabase.from("saves").select("track_id").eq("track_id", track.id).maybeSingle(),
           supabase.from("ratings").select("s1, s2, s3, s4").eq("track_id", track.id).maybeSingle(),
           supabase.from("plays").select("day").eq("track_id", track.id).not("counted_at", "is", null).limit(1),
+          supabase.from("votes").select("track_id").eq("track_id", track.id).eq("week_start", periodStart("week")).maybeSingle(),
         ])
       : null,
   ]);
-  // RLS: saves/ratings/plays sadece kendi satırlarını döndürür.
-  const [liked, saved, myRating, listened] = mine ?? [null, null, null, null];
+  // RLS: saves/ratings/plays/votes sadece kendi satırlarını döndürür.
+  const [liked, saved, myRating, listened, myVote] = mine ?? [null, null, null, null, null];
 
   const name = artist.display_name || artist.username;
   const playerTrack = toPlayerTrack(track, { name, username: artist.username });
@@ -119,6 +130,7 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
               </>
             )}
           </p>
+          <BestRank best={best.data} />
           {track.status !== "active" && (
             <span className="rounded-full bg-danger/10 px-3 py-1 text-xs font-medium text-danger">Bu parça gizlendi; sadece sen görüyorsun.</span>
           )}
@@ -129,6 +141,15 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
         <PlayButton track={playerTrack} size="lg" />
         <Waveform track={playerTrack} peaks={track.waveform} />
       </div>
+
+      <VoteButton
+        trackId={track.id}
+        viewerId={viewerId}
+        isOwner={isOwner}
+        listened={(listened?.data ?? []).length > 0}
+        voted={!!myVote?.data}
+        votes={totals.data?.votes ?? 0}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <ShareButton title={`${track.title} — ${name}`} />

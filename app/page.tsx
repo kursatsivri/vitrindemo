@@ -2,11 +2,12 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Cover } from "@/app/components/cover";
 import { GenreFilter } from "@/app/components/genre-pills";
+import { RankingList, withTracks } from "@/app/components/ranking";
 import { PlayButton, TrackQueue } from "@/app/components/player";
 import { genreLabel, GridSkeleton, toPlayerTrack, TrackGrid, type TrackListRow, withArtist } from "@/app/components/track-row";
 import { GENRES } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
-import { formatDuration } from "@/lib/tracks";
+import { formatDuration, periodStart } from "@/lib/tracks";
 
 const FEED_LIMIT = 50;
 
@@ -139,6 +140,25 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchPara
   );
 }
 
+// Bu haftanın zirvesi: haftalık genel listenin ilk 5'i; oy yoksa hiç görünmez.
+async function WeeklyTop() {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("ranking", { p_period: "week", p_start: periodStart("week") }).limit(5);
+  const rows = await withTracks(supabase, data ?? []);
+  if (rows.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-end justify-between gap-4">
+        <h2 className="font-display text-2xl font-bold tracking-[-0.03em] md:text-4xl md:tracking-[-0.035em]">Bu haftanın zirvesi</h2>
+        <Link href="/siralama" className="link text-sm">
+          Tüm sıralama
+        </Link>
+      </div>
+      <RankingList rows={rows} />
+    </section>
+  );
+}
+
 function FeedSkeleton() {
   return (
     <>
@@ -158,6 +178,9 @@ export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <main className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col gap-8 px-4 py-6 md:gap-16 md:px-10 md:py-14">
       <h1 className="sr-only">Vitrin — yeni sesler</h1>
+      <Suspense>
+        <WeeklyTop />
+      </Suspense>
       <Suspense fallback={<FeedSkeleton />}>
         <Feed searchParams={searchParams} />
       </Suspense>

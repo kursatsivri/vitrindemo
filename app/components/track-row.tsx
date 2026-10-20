@@ -40,6 +40,7 @@ export function TrackRow({
   showArtist = false,
   isOwner = false,
   featured = false,
+  aside,
 }: {
   track: TrackRowData;
   artist: { name: string; username: string };
@@ -47,6 +48,7 @@ export function TrackRow({
   showArtist?: boolean;
   isOwner?: boolean;
   featured?: boolean;
+  aside?: React.ReactNode;
 }) {
   return (
     <li
@@ -74,6 +76,7 @@ export function TrackRow({
       {STATUS_LABELS[track.status] && (
         <span className="rounded-full bg-danger/10 px-2.5 py-0.5 text-xs font-medium text-danger">{STATUS_LABELS[track.status]}</span>
       )}
+      {aside}
       {track.duration_sec ? (
         <span className="text-[13px] text-text-muted tabular-nums">{formatDuration(track.duration_sec)}</span>
       ) : null}
