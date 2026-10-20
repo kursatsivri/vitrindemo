@@ -19,12 +19,19 @@ function authError(code: string | undefined): string {
       return "Çok fazla deneme yapıldı. Biraz sonra tekrar dene.";
     case "same_password":
       return "Yeni şifre eskisiyle aynı olamaz.";
+    case "user_banned":
+      return "Hesabın askıya alındı. İtiraz için destekle iletişime geç.";
+    case "captcha_failed":
+      return "Robot doğrulaması başarısız. Kutucuğu yeniden doğrulayıp tekrar dene.";
     case "unexpected_failure":
       return "Bu kullanıcı adı alınamadı. Başka bir ad dene.";
     default:
       return "Bir hata oluştu. Lütfen tekrar dene.";
   }
 }
+
+// Turnstile token'ı (captcha kapalıysa boş; Supabase captcha açıkken zorunlu)
+const captcha = (formData: FormData) => String(formData.get("cf-turnstile-response") ?? "") || undefined;
 
 async function origin() {
   return (await headers()).get("origin") ?? "";
@@ -55,6 +62,7 @@ export async function signUp(_: FormState, formData: FormData): Promise<FormStat
     password,
     options: {
       data: { role, username },
+      captchaToken: captcha(formData),
       emailRedirectTo: `${await origin()}/auth/confirm?next=/tercihler`,
     },
   });
@@ -68,6 +76,7 @@ export async function signIn(_: FormState, formData: FormData): Promise<FormStat
   const { data, error } = await supabase.auth.signInWithPassword({
     email: String(formData.get("email") ?? "").trim(),
     password: String(formData.get("password") ?? ""),
+    options: { captchaToken: captcha(formData) },
   });
   if (error) return { error: authError(error.code) };
 
@@ -89,7 +98,7 @@ export async function requestPasswordReset(_: FormState, formData: FormData): Pr
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(
     String(formData.get("email") ?? "").trim(),
-    { redirectTo: `${await origin()}/auth/confirm?next=/sifre-yenile` },
+    { redirectTo: `${await origin()}/auth/confirm?next=/sifre-yenile`, captchaToken: captcha(formData) },
   );
   if (error) return { error: authError(error.code) };
 
