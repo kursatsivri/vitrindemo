@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
 import { UserCheck } from "lucide-react";
 import { Suspense } from "react";
 import { ArtistLine, PROFILE_MINI } from "@/app/components/artist-line";
@@ -7,18 +6,14 @@ import { ListSkeleton } from "@/app/components/track-row";
 import { EmptyState } from "@/app/components/notice";
 import { labelOf } from "@/lib/music";
 import { SCOUT_KINDS } from "@/lib/scouts";
-import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "../guard";
 import { approveScout } from "@/app/kesifci/actions";
 
 export const metadata: Metadata = { title: "Keşifçi başvuruları | Vitrin" };
 
 // Faz 7'de tam yönetici paneline büyür. Yetki DB'de (approve_scout); burası sadece görünüm.
 async function Applications() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/giris");
-  const { data: me } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (me?.role !== "admin") notFound();
+  const supabase = await adminClient();
 
   const { data, error } = await supabase
     .from("scout_applications")
@@ -54,11 +49,8 @@ async function Applications() {
 
 export default function Page() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-7 md:py-14">
-      <h1 className="font-display text-4xl leading-none font-extrabold tracking-[-0.04em]">Keşifçi başvuruları</h1>
-      <Suspense fallback={<ListSkeleton />}>
-        <Applications />
-      </Suspense>
-    </main>
+    <Suspense fallback={<ListSkeleton />}>
+      <Applications />
+    </Suspense>
   );
 }
