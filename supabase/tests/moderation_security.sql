@@ -108,6 +108,22 @@ begin
   if exists (select 1 from public.blocks) then raise exception 'FAIL: engellenen engel satırını görüyor'; end if;
 end $$;
 
+-- Üçüncü kişi (B) kimin kimi engellediğini öğrenemez; engellenen (C) kendisinin engellendiğini görür
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}';
+do $$
+begin
+  if public.is_blocked('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-00000000000c') then
+    raise exception 'FAIL: üçüncü kişi engel bilgisini görüyor';
+  end if;
+end $$;
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-00000000000c","role":"authenticated"}';
+do $$
+begin
+  if not public.is_blocked('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-00000000000c') then
+    raise exception 'FAIL: engellenen engeli göremiyor';
+  end if;
+end $$;
+
 -- K (engellenen keşifçi) ilgi gönderemez
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-00000000000d","role":"authenticated"}';
 select pg_temp.expect_fail('select public.send_interest(''00000000-0000-0000-0000-00000000000a'')');
@@ -231,6 +247,7 @@ begin
 end $$;
 select pg_temp.expect_fail('select 1 from public.notifications');
 select pg_temp.expect_fail('select 1 from public.blocks');
+select pg_temp.expect_fail('select public.is_blocked(''00000000-0000-0000-0000-00000000000a'', ''00000000-0000-0000-0000-00000000000c'')');
 select pg_temp.expect_fail('insert into public.reports (reporter_id, target_type, target_id, reason) values (''00000000-0000-0000-0000-00000000000b'', ''track'', ''00000000-0000-0000-0000-0000000000a2'', ''other'')');
 
 -- Admin geri açar → parçalar döner, giriş engeli kalkar
