@@ -426,6 +426,42 @@ export type Database = {
           },
         ]
       }
+      swipes: {
+        Row: {
+          action: string
+          created_at: string
+          track_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          track_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          track_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swipes_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swipes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       track_features: {
         Row: {
           artist_id: string
@@ -527,6 +563,32 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          genres: string[]
+          tags: string[]
+          user_id: string
+        }
+        Insert: {
+          genres?: string[]
+          tags?: string[]
+          user_id: string
+        }
+        Update: {
+          genres?: string[]
+          tags?: string[]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       votes: {
         Row: {
           counts: boolean
@@ -571,6 +633,13 @@ export type Database = {
       }
     }
     Views: {
+      city_artist_counts: {
+        Row: {
+          artists: number | null
+          city: number | null
+        }
+        Relationships: []
+      }
       ear_leaderboard: {
         Row: {
           month_start: string | null
@@ -652,6 +721,19 @@ export type Database = {
         }[]
       }
       count_play: { Args: { p_track: string }; Returns: boolean }
+      discover_feed: {
+        Args: {
+          p_city?: number
+          p_genre?: string
+          p_limit?: number
+          p_mood?: string
+          p_tag?: string
+        }
+        Returns: {
+          score: number
+          track_id: string
+        }[]
+      }
       is_active_track: { Args: { p_track: string }; Returns: boolean }
       period_start: {
         Args: { p_at?: string; p_period: string }
@@ -684,6 +766,59 @@ export type Database = {
           a4: number
           n: number
         }[]
+      }
+      search_artists: {
+        Args: { p_city?: number; p_q: string }
+        Returns: {
+          avatar_path: string | null
+          bio: string | null
+          city: number | null
+          created_at: string
+          display_name: string | null
+          featured_track_id: string | null
+          genres: string[]
+          id: string
+          open_to_discovery: boolean
+          role: string
+          socials: Json
+          username: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      search_pattern: { Args: { p_q: string }; Returns: string }
+      search_tracks: {
+        Args: { p_city?: number; p_genre?: string; p_q: string; p_tag?: string }
+        Returns: {
+          artist_id: string
+          audio_path: string
+          comments_enabled: boolean
+          cover_path: string | null
+          created_at: string
+          description: string | null
+          duration_sec: number | null
+          genre: string
+          hook_sec: number
+          id: string
+          links: Json
+          moods: string[]
+          rights_confirmed: boolean
+          seeking_vocal: boolean
+          status: string
+          tags: string[]
+          title: string
+          waveform: number[] | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "tracks"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       start_play: { Args: { p_track: string }; Returns: undefined }
     }
