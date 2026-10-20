@@ -140,6 +140,27 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/">["searchPara
   );
 }
 
+// Sana özel: girişli kullanıcıya öneri akışından 10 parça (tercih, beğeni benzerliği, takip, yükselenler).
+async function ForYou() {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims.sub) return null;
+  const { data } = await supabase.rpc("discover_feed", { p_limit: 10 });
+  const rows = await withTracks(supabase, (data ?? []).map((r, i) => ({ rank: i + 1, track_id: r.track_id, score: 0 })));
+  if (rows.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-5">
+      <div className="flex items-end justify-between gap-4">
+        <h2 className="font-display text-2xl font-bold tracking-[-0.03em] md:text-4xl md:tracking-[-0.035em]">Sana özel</h2>
+        <Link href="/kesfet" className="link text-sm">
+          Keşfet modunda dinle
+        </Link>
+      </div>
+      <TrackGrid rows={rows} empty={null} />
+    </section>
+  );
+}
+
 // Bu haftanın zirvesi: haftalık genel listenin ilk 5'i; oy yoksa hiç görünmez.
 async function WeeklyTop() {
   const supabase = await createClient();
@@ -180,6 +201,9 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <h1 className="sr-only">Vitrin — yeni sesler</h1>
       <Suspense>
         <WeeklyTop />
+      </Suspense>
+      <Suspense>
+        <ForYou />
       </Suspense>
       <Suspense fallback={<FeedSkeleton />}>
         <Feed searchParams={searchParams} />

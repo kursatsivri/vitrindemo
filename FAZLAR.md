@@ -1,6 +1,6 @@
 # Vitrin — Fazlar ve yol haritası
 
-Son güncelleme: 18 Ekim 2026 · Ayrıntılı kurallar: [SPEC.md](SPEC.md)
+Son güncelleme: 21 Ekim 2026 · Ayrıntılı kurallar: [SPEC.md](SPEC.md)
 
 **Vitrin nedir?** Spotify gibi bir dinleme sitesi değil; Tinder mantığında bir **keşfedilme platformu**. Yetenekler (rapçi, şarkıcı, beatmaker) keşfedilmek için gelir; keşifçiler (yapımcı, plak şirketi, menajer) yeni yetenek bulmak için gelir; dinleyiciler oylarıyla sıralamayı belirler.
 
@@ -11,10 +11,10 @@ Toplam **10 faz** (0–9). Her faz: çalıştırılır → test edilir → GitHu
 | 0 | Kurulum | ✅ Bitti |
 | 1 | Hesap ve profil | ✅ Bitti |
 | 2 | Parça yükleme, akış, oynatıcı, dinleme kaydı | ✅ Bitti |
-| 3 | Türler, parça sayfası, beğeni, kaydet, takip, yorum, geri bildirim | ✅ Bitti (3B merge bekliyor) |
-| 4 | Oylama, sıralamalar, erken keşifçi puanı | ⏳ Sırada |
-| 5 | Keşfet modu (kaydırma), öneriler, yakınındaki yetenekler | ⏳ |
-| 6 | Keşifçi tarafı, eşleşme, fırsat panosu | ⏳ |
+| 3 | Türler, parça sayfası, beğeni, kaydet, takip, yorum, geri bildirim | ✅ Bitti |
+| 4 | Oylama, sıralamalar, erken keşifçi puanı | ✅ Bitti |
+| 5 | Keşfet modu (kaydırma), öneriler, yakınındaki yetenekler | 🔍 Kod bitti, test bekliyor |
+| 6 | Keşifçi tarafı, eşleşme, fırsat panosu | ⏳ Sırada |
 | 7 | Bildirimler, şikayet, yönetici paneli, haftalık challenge | ⏳ |
 | 8 | Canlıya çıkış | ⏳ |
 | 9 | Premium üyelik ve mesajlaşma | ⏳ (şirket kaydından sonra) |
@@ -57,7 +57,7 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - Profile **şehir**, **öne çıkan parça**, **"keşfedilmeye açığım"**
 - Oynatıcıda **önceki/sonraki**, bitince sıradakine geçme
 
-## Faz 4 — Oylama ve sıralamalar ⏳ (sırada — sitenin kalbi)
+## Faz 4 — Oylama ve sıralamalar ✅
 - **Oy ≠ beğeni.** Oy sıralamayı belirler; kuralları sıkı:
   - Sadece yukarı oy · kendi parçana oy yok · aynı parçaya haftada 1 oy
   - Oy için en az 30 saniye dinlemiş olmak şart
@@ -71,7 +71,7 @@ Next.js + Tailwind sitesi, Supabase (veritabanı, giriş, dosya), GitHub ve Verc
 - **Erken keşifçi puanı ("Ben demiştim"):** parça az oyluyken oy verdiysen ve parça sonra ilk 10'a girerse puan kazanırsın; **"En iyi kulaklar"** dinleyici sıralaması ve rozetler
 - **Sahte oy koruması:** kayıtta captcha, hız sınırları, şüpheli hesap kümelerinin tespiti
 
-## Faz 5 — Keşfet modu ve öneriler ⏳ (Tinder kısmı)
+## Faz 5 — Keşfet modu ve öneriler 🔍 (Tinder kısmı — kod bitti, test bekliyor)
 - Tam ekran kart: parça "en iyi an"dan çalar · **sağa = beğen, sola = geç**, kaydet
 - 30 sn dinleyince karttan oy da verilebilir
 - Filtre: tür, etiket, ruh hali, şehir · görülen parça tekrar gelmez

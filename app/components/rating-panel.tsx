@@ -30,7 +30,7 @@ export function RatingPanel({
   const router = useRouter();
   const player = usePlayer();
   // Bu sayfada 35 sn çalındıysa dinleme kaydı düşmüştür; formu yenilemeden aç (DB yine doğrular).
-  const listenedHere = player?.current?.id === trackId && player.time >= 35;
+  const listenedHere = player?.current?.id === trackId && player.listened >= 35;
   const [scores, setScores] = useState<number[]>(mine ?? [0, 0, 0, 0]);
   const [status, setStatus] = useState<{ tone: "error" | "success"; text: string } | null>(null);
   const [busy, setBusy] = useState(false);

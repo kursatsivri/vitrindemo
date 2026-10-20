@@ -33,12 +33,12 @@ export function VoteButton({
   isOwner: boolean;
   listened: boolean;
   voted: boolean;
-  votes: number;
+  votes?: number;
 }) {
   const router = useRouter();
   const player = usePlayer();
   // Bu sayfada 35 sn çalındıysa dinleme kaydı düşmüştür (RatingPanel ile aynı).
-  const listenedHere = player?.current?.id === trackId && player.time >= 35;
+  const listenedHere = player?.current?.id === trackId && player.listened >= 35;
   const [done, setDone] = useState(voted);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ tone: "error" | "success"; text: string } | null>(null);
@@ -68,9 +68,11 @@ export function VoteButton({
         ) : (
           <span className="text-sm text-text-muted">Oy vermek için parçayı en az 30 saniye dinle.</span>
         )}
-        <span className="text-sm text-text-muted">
-          <span className="font-medium text-text tabular-nums">{votes}</span> oy
-        </span>
+        {votes !== undefined && (
+          <span className="text-sm text-text-muted">
+            <span className="font-medium text-text tabular-nums">{votes}</span> oy
+          </span>
+        )}
       </div>
       {status && <Notice tone={status.tone}>{status.text}</Notice>}
     </div>

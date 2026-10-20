@@ -14,6 +14,8 @@ export type PlayerTrack = {
   coverPath: string | null;
   artistName: string;
   artistUsername: string;
+  // Keşfet modunda "en iyi an": parça bu saniyeden başlar
+  startSec?: number;
 };
 
 type Player = {
@@ -21,6 +23,8 @@ type Player = {
   playing: boolean;
   time: number;
   duration: number;
+  // Bu parçada gerçekten çalınan saniye (ileri sarma hariç): oy/puan butonlarını göstermek için
+  listened: number;
   play: (t: PlayerTrack, queue?: PlayerTrack[]) => void;
   seekTo: (sec: number) => void;
 };
@@ -56,9 +60,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [listened, setListened] = useState(0);
   const [volume, setVolume] = useState(1);
   // Dinleme durumu parçaya bağlı tutulur (state değil ref: olay sırasında hep güncel).
   const listen = useRef(newListen(""));
+  const pendingStart = useRef(0);
 
   const index = current ? queue.findIndex((t) => t.id === current.id) : -1;
   const nextTrack = index >= 0 ? queue[index + 1] : undefined;
@@ -80,6 +86,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setCurrent(t);
     setTime(0);
     setDuration(0);
+    setListened(0);
+    pendingStart.current = t.startSec ?? 0;
     a.src = storageUrl("tracks", t.audioPath);
     // Yükleme sırasında duraklatılırsa play() reddedilir; zararsız.
     a.play().catch(() => {});
@@ -126,6 +134,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // Sadece gerçekten çalınan süreyi say; ileri sarma (büyük sıçrama) sayılmaz.
     const delta = a.currentTime - l.last;
     if (!a.paused && delta > 0 && delta < 2) l.sec += delta;
+    setListened(l.sec);
     l.last = a.currentTime;
 
     if (l.started && !l.done && l.sec >= l.nextCheck) {
@@ -153,7 +162,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const fmt = (sec: number) => formatDuration(Math.floor(sec)) || "0:00";
 
   return (
-    <PlayerContext.Provider value={{ current, playing, time, duration, play, seekTo }}>
+    <PlayerContext.Provider value={{ current, playing, time, duration, listened, play, seekTo }}>
       {children}
       <audio
         ref={audio}
@@ -168,7 +177,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           if (nextTrack) load(nextTrack);
         }}
         onTimeUpdate={onTimeUpdate}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onLoadedMetadata={(e) => {
+          setDuration(e.currentTarget.duration);
+          // İleri sarma dinleme süresine sayılmaz (onTimeUpdate'teki sıçrama kontrolü)
+          if (pendingStart.current) e.currentTarget.currentTime = pendingStart.current;
+          pendingStart.current = 0;
+        }}
       />
       {current && (
         <>

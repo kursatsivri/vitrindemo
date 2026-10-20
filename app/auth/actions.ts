@@ -55,7 +55,7 @@ export async function signUp(_: FormState, formData: FormData): Promise<FormStat
     password,
     options: {
       data: { role, username },
-      emailRedirectTo: `${await origin()}/auth/confirm?next=/profil/duzenle`,
+      emailRedirectTo: `${await origin()}/auth/confirm?next=/tercihler`,
     },
   });
   if (error) return { error: authError(error.code) };
