@@ -1,10 +1,39 @@
 import { Trophy } from "lucide-react";
 import { TrackQueue } from "@/app/components/player";
 import { genreLabel, toPlayerTrack, TrackRow, type TrackListRow, withArtist } from "@/app/components/track-row";
+import { cityName, GENRES, labelOf } from "@/lib/music";
 import type { createClient } from "@/lib/supabase/server";
+import { periodStart } from "@/lib/tracks";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 export type RankedRow = TrackListRow & { rank: number; score: number };
+
+const ARCHIVE_SIZE = 12;
+
+// /siralama filtreleri (?donem=ay&tur=…&sehir=…&baslangic=…): sayfa ve hikâye görseli aynı listeyi gösterir.
+// Arşiv: son 12 dönem; ranking() arşivlenmişse dondurulmuş listeyi, değilse canlıyı döndürür.
+export function rankingFilters(q: Record<string, string | string[] | undefined>, now: Date) {
+  const period: "week" | "month" = q.donem === "ay" ? "month" : "week";
+  const genre = GENRES.some((g) => g.value === q.tur) ? (q.tur as string) : null;
+  const city = cityName(Number(q.sehir)) ? Number(q.sehir) : null;
+  const starts = Array.from({ length: ARCHIVE_SIZE }, (_, i) => periodStart(period, now, i));
+  const start = starts.includes(q.baslangic as string) ? (q.baslangic as string) : starts[0];
+  const title = [
+    period === "week" ? "Haftalık" : "Aylık",
+    genre ? labelOf(GENRES, genre) : "genel",
+    "liste",
+    city ? `· ${cityName(city)}` : "",
+  ].join(" ");
+  return { period, genre, city, starts, start, title };
+}
+
+export function periodLabel(period: "week" | "month", start: string, i: number) {
+  if (i === 0) return period === "week" ? "Bu hafta" : "Bu ay";
+  const d = new Date(`${start}T00:00:00Z`);
+  return period === "week"
+    ? `${d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", timeZone: "UTC" })} haftası`
+    : d.toLocaleDateString("tr-TR", { month: "long", year: "numeric", timeZone: "UTC" });
+}
 
 // ranking()/rising_live satırlarına parça + sanatçı bilgisini ekler, sırayı korur.
 export async function withTracks(supabase: Db, rows: { rank: number; track_id: string; score: number }[]): Promise<RankedRow[]> {

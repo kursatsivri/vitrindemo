@@ -1,40 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Trophy } from "lucide-react";
+import { Download, Trophy } from "lucide-react";
 import { Suspense } from "react";
 import { Select } from "@/app/components/field";
 import { GenreFilter } from "@/app/components/genre-pills";
 import { EmptyState } from "@/app/components/notice";
-import { RankingList, withTracks } from "@/app/components/ranking";
+import { periodLabel, RankingList, rankingFilters, withTracks } from "@/app/components/ranking";
 import { ListSkeleton } from "@/app/components/track-row";
-import { cityName, CITIES, GENRES, labelOf } from "@/lib/music";
+import { CITIES } from "@/lib/music";
 import { createClient } from "@/lib/supabase/server";
 import { periodStart } from "@/lib/tracks";
 
 export const metadata: Metadata = { title: "Sıralama | Vitrin" };
 
-const ARCHIVE_SIZE = 12;
 const sideTitle = "font-display text-xl font-bold tracking-[-0.03em]";
 
-function periodLabel(period: "week" | "month", start: string, i: number) {
-  if (i === 0) return period === "week" ? "Bu hafta" : "Bu ay";
-  const d = new Date(`${start}T00:00:00Z`);
-  return period === "week"
-    ? `${d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", timeZone: "UTC" })} haftası`
-    : d.toLocaleDateString("tr-TR", { month: "long", year: "numeric", timeZone: "UTC" });
-}
-
 async function Ranking({ searchParams }: { searchParams: PageProps<"/siralama">["searchParams"] }) {
-  const { donem, tur, sehir, baslangic } = await searchParams;
+  const query = await searchParams;
   const supabase = await createClient();
-
-  const period = donem === "ay" ? "month" : "week";
-  const genre = GENRES.some((g) => g.value === tur) ? (tur as string) : null;
-  const city = cityName(Number(sehir)) ? Number(sehir) : null;
-  // Arşiv: son 12 dönem; ranking() arşivlenmişse dondurulmuş listeyi, değilse canlıyı döndürür.
   const now = new Date();
-  const starts = Array.from({ length: ARCHIVE_SIZE }, (_, i) => periodStart(period, now, i));
-  const start = starts.includes(baslangic as string) ? (baslangic as string) : starts[0];
+  const { period, genre, city, starts, start, title } = rankingFilters(query, now);
 
   // ponytail: ilk 50; uzun listeler için sayfalama ekle.
   const [ranking, rising, ears] = await Promise.all([
@@ -67,12 +52,6 @@ async function Ranking({ searchParams }: { searchParams: PageProps<"/siralama">[
     return q.size ? `/siralama?${q}` : "/siralama";
   };
   const archived = ranking.data[0]?.archived ?? false;
-  const title = [
-    period === "week" ? "Haftalık" : "Aylık",
-    genre ? labelOf(GENRES, genre) : "genel",
-    "liste",
-    city ? `· ${cityName(city)}` : "",
-  ].join(" ");
 
   return (
     <>
@@ -138,6 +117,12 @@ async function Ranking({ searchParams }: { searchParams: PageProps<"/siralama">[
               {periodLabel(period, start, starts.indexOf(start))} · {archived ? "Arşiv (dondurulmuş)" : "Canlı"}
             </span>
           </div>
+          {rows.length > 0 && (
+            <a href={href(genre).replace("/siralama", "/siralama/hikaye")} download className="btn-secondary self-start">
+              <Download aria-hidden className="size-[18px]" strokeWidth={1.75} />
+              Hikâye görseli
+            </a>
+          )}
           {rows.length > 0 ? (
             <RankingList rows={rows} />
           ) : (
