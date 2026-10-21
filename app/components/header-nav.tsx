@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheck, Bookmark, Briefcase, ChartColumn, Compass, House, LogOut, Pencil, ShieldCheck, SlidersHorizontal, Swords, Trophy, User, Users } from "lucide-react";
+import { BadgeCheck, Bookmark, Briefcase, ChartColumn, Compass, House, LogOut, Pencil, Settings, ShieldCheck, SlidersHorizontal, Swords, Trophy, User, Users } from "lucide-react";
 import { useRef } from "react";
 import { signOut } from "@/app/auth/actions";
 
@@ -95,6 +95,10 @@ export function AccountMenu({ username, name, role, children }: { username: stri
         <Link href="/tercihler" onClick={close} className={item}>
           <SlidersHorizontal aria-hidden className="size-[18px]" strokeWidth={1.75} />
           Tercihlerim
+        </Link>
+        <Link href="/profil/hesap" onClick={close} className={item}>
+          <Settings aria-hidden className="size-[18px]" strokeWidth={1.75} />
+          Hesap ayarları
         </Link>
         <form action={signOut}>
           <button type="submit" className={`${item} w-full text-text-muted`}>

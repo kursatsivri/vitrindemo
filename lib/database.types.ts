@@ -1340,6 +1340,7 @@ export type Database = {
         Returns: string
       }
       daily_notifications: { Args: never; Returns: undefined }
+      delete_my_account: { Args: never; Returns: undefined }
       discover_feed: {
         Args: {
           p_city?: number
@@ -1353,6 +1354,7 @@ export type Database = {
           track_id: string
         }[]
       }
+      export_my_data: { Args: never; Returns: Json }
       finish_challenges: { Args: never; Returns: number }
       has_role: { Args: { p_role: string }; Returns: boolean }
       is_active_track: { Args: { p_track: string }; Returns: boolean }
