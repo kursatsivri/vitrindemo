@@ -14,6 +14,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000012', 'v2@test.local', '{"role":"listener","username":"test_ch_v2"}'),
   ('00000000-0000-0000-0000-000000000013', 'v3@test.local', '{"role":"listener","username":"test_ch_v3"}');
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-00000000000e';
+-- Demo verisindeki bu ve geçen haftanın challenge'ları testi etkilemesin (rollback geri getirir)
+delete from public.challenges where week_start >= public.period_start('week') - 7;
 
 -- b1 aday beat, b2 aday değil; r1 bu hafta 3 parça yükledi (haftalık sınır dolu)
 insert into public.tracks (id, artist_id, title, genre, audio_path, rights_confirmed, challenge_candidate, created_at) values
