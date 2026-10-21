@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Inter } from "next/font/google";
+import { Footer } from "./components/footer";
 import { Header } from "./components/header";
 import { PlayerProvider } from "./components/player";
 import "./globals.css";
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <PlayerProvider>
           <Header />
           {children}
+          <Footer />
         </PlayerProvider>
       </body>
     </html>

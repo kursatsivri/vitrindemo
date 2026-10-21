@@ -4,7 +4,7 @@ import { signUp } from "@/app/auth/actions";
 import { ActionForm } from "@/app/components/action-form";
 import { Captcha } from "@/app/components/captcha";
 import { AuthCard } from "@/app/components/auth-card";
-import { Field } from "@/app/components/field";
+import { CheckCard, Field } from "@/app/components/field";
 
 export const metadata = { title: "Kayıt ol — Vitrin" };
 
@@ -56,6 +56,16 @@ export default function Page() {
           minLength={8}
           autoComplete="new-password"
           hint="En az 8 karakter"
+        />
+        <CheckCard
+          name="terms"
+          required
+          title={
+            <>
+              <Link href="/yasal/kullanim-sartlari" target="_blank" className="link">Kullanım şartlarını</Link> ve{" "}
+              <Link href="/yasal/kvkk" target="_blank" className="link">KVKK aydınlatma metnini</Link> okudum
+            </>
+          }
         />
         <Captcha />
       </ActionForm>

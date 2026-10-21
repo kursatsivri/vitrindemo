@@ -48,6 +48,7 @@ export async function signUp(_: FormState, formData: FormData): Promise<FormStat
     return { error: "Kullanıcı adı 3–20 karakter olmalı: küçük harf, rakam, _ ve . (Türkçe karakter yok)." };
   }
   if (password.length < 8) return { error: "Şifre en az 8 karakter olmalı." };
+  if (formData.get("terms") !== "on") return { error: "Devam etmek için şartları onayla." };
 
   const supabase = await createClient();
   const { data: taken } = await supabase

@@ -45,7 +45,7 @@ export function CheckCard({
   title,
   hint,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { title: string; hint?: string }) {
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, "title"> & { title: React.ReactNode; hint?: string }) {
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-surface p-4 transition duration-150 has-checked:border-accent/45 has-focus-visible:outline-2 has-focus-visible:outline-accent">
       <input type="checkbox" {...props} className="mt-0.5 size-5 shrink-0 accent-accent" />
