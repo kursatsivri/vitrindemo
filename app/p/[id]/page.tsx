@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink, Pencil } from "lucide-react";
+import { Download, ExternalLink, Pencil } from "lucide-react";
 import { cache, Suspense } from "react";
 import { Comments } from "@/app/components/comments";
 import { Cover } from "@/app/components/cover";
@@ -157,6 +157,12 @@ async function TrackPage({ params }: { params: PageProps<"/p/[id]">["params"] })
 
       <div className="flex flex-wrap items-center gap-2">
         <ShareButton title={`${track.title} — ${name}`} />
+        {track.status === "active" && (
+          <a href={`/p/${track.id}/hikaye`} download className="btn-secondary">
+            <Download aria-hidden className="size-[18px]" strokeWidth={1.75} />
+            Hikâye görseli
+          </a>
+        )}
         {!isOwner && viewerId && <ReportButton targetType="track" targetId={track.id} viewerId={viewerId} />}
         <LikeSaveButtons
           trackId={track.id}

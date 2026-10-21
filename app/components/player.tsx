@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useEffectEvent, useRef, useState } from "react";
 import { Cover } from "@/app/components/cover";
 import { createClient } from "@/lib/supabase/client";
 import { formatDuration, storageUrl } from "@/lib/tracks";
@@ -120,6 +120,52 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (audio.current) audio.current.currentTime = sec;
   }
 
+  // Kilit ekranı / bildirim kontrolleri (Media Session); desteklemeyen tarayıcıda atlanır.
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+    navigator.mediaSession.metadata = current
+      ? new MediaMetadata({
+          title: current.title,
+          artist: current.artistName,
+          artwork: current.coverPath ? [{ src: storageUrl("covers", current.coverPath) }] : [],
+        })
+      : null;
+  }, [current]);
+
+  const onMediaAction = useEffectEvent((d: MediaSessionActionDetails) => {
+    const a = audio.current;
+    if (!a) return;
+    const step = d.seekOffset ?? 10;
+    if (d.action === "play") a.play().catch(() => {});
+    else if (d.action === "pause") a.pause();
+    else if (d.action === "previoustrack") prev();
+    else if (d.action === "nexttrack" && nextTrack) load(nextTrack);
+    else if (d.action === "seekto" && d.seekTime != null) seekTo(d.seekTime);
+    else if (d.action === "seekbackward") seekTo(Math.max(0, a.currentTime - step));
+    else if (d.action === "seekforward") seekTo(Math.min(a.duration || 0, a.currentTime + step));
+  });
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+    const actions: MediaSessionAction[] = ["play", "pause", "previoustrack", "nexttrack", "seekto", "seekbackward", "seekforward"];
+    for (const action of actions) {
+      try {
+        navigator.mediaSession.setActionHandler(action, (d) => onMediaAction(d));
+      } catch {
+        // Bu tarayıcı bu eylemi desteklemiyor
+      }
+    }
+  }, []);
+
+  function updatePosition(a: HTMLAudioElement) {
+    if (!("mediaSession" in navigator) || !Number.isFinite(a.duration)) return;
+    try {
+      navigator.mediaSession.setPositionState({ duration: a.duration, position: Math.min(a.currentTime, a.duration), playbackRate: a.playbackRate });
+    } catch {
+      // setPositionState desteklenmiyor
+    }
+  }
+
   function onPlaying() {
     setPlaying(true);
     listen.current.playing = true;
@@ -130,6 +176,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const a = audio.current;
     if (!a || !current) return;
     setTime(a.currentTime);
+    updatePosition(a);
     const l = listen.current;
     // Sadece gerçekten çalınan süreyi say; ileri sarma (büyük sıçrama) sayılmaz.
     const delta = a.currentTime - l.last;
