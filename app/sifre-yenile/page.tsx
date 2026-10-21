@@ -17,6 +17,14 @@ export default function Page() {
           minLength={8}
           autoComplete="new-password"
         />
+        <Field
+          label="Yeni şifre (tekrar)"
+          name="password2"
+          type="password"
+          required
+          minLength={8}
+          autoComplete="new-password"
+        />
       </ActionForm>
     </AuthCard>
   );

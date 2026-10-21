@@ -14,6 +14,9 @@ async function LinkStatus({ searchParams }: { searchParams: PageProps<"/giris">[
   if (durum === "dogrulandi") {
     return <Notice tone="success">E-postan doğrulandı. Şimdi giriş yapabilirsin.</Notice>;
   }
+  if (durum === "sifre") {
+    return <Notice tone="success">Şifren değişti. Yeni şifrenle giriş yap.</Notice>;
+  }
   if (durum === "link") {
     return <Notice tone="error">Link geçersiz veya süresi dolmuş. Tekrar dene.</Notice>;
   }

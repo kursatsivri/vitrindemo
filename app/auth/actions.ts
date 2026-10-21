@@ -109,6 +109,7 @@ export async function requestPasswordReset(_: FormState, formData: FormData): Pr
 export async function updatePassword(_: FormState, formData: FormData): Promise<FormState> {
   const password = String(formData.get("password") ?? "");
   if (password.length < 8) return { error: "Şifre en az 8 karakter olmalı." };
+  if (password !== String(formData.get("password2") ?? "")) return { error: "Şifreler aynı değil." };
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -117,5 +118,7 @@ export async function updatePassword(_: FormState, formData: FormData): Promise<
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: authError(error.code) };
 
-  redirect("/profil/duzenle");
+  // Sıfırlama linkinin açtığı oturum kapanır; kullanıcı yeni şifresiyle kendisi giriş yapar.
+  await supabase.auth.signOut();
+  redirect("/giris?durum=sifre");
 }
