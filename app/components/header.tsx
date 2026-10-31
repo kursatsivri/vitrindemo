@@ -30,14 +30,11 @@ async function UserNav() {
 
   if (!userId) {
     return (
-      <>
-        <NavLinks loggedIn={false} />
-        <div className="flex flex-1 items-center justify-end gap-1 md:flex-none">
-          <QuickLinks />
-          <Link href="/giris" className="btn-ghost px-3 md:px-5">Giriş</Link>
-          <Link href="/kayit" className="btn-primary">Kayıt ol</Link>
-        </div>
-      </>
+      // Girişsizde menü yok: içerik sayfaları tanıtıma döner (proxy.ts)
+      <div className="ml-auto flex items-center gap-1">
+        <Link href="/giris" className="btn-ghost px-3 md:px-5">Giriş</Link>
+        <Link href="/kayit" className="btn-primary">Kayıt ol</Link>
+      </div>
     );
   }
 
