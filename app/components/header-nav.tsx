@@ -14,21 +14,21 @@ function useActive() {
 }
 
 const LINKS = [
-  { href: "/", label: "Ana sayfa", icon: House, auth: false },
-  { href: "/kesfet", label: "Keşfet", icon: Compass, auth: false },
-  { href: "/siralama", label: "Sıralama", icon: Trophy, auth: false },
-  { href: "/challenge", label: "Challenge", icon: Swords, auth: false },
-  { href: "/firsatlar", label: "Fırsatlar", icon: Briefcase, auth: false },
-  { href: "/?akis=takip", label: "Takip ettiklerin", icon: Users, auth: true },
-  { href: "/profil/kaydedilenler", label: "Kaydedilenler", icon: Bookmark, auth: true },
+  { href: "/", label: "Ana sayfa", icon: House },
+  { href: "/kesfet", label: "Keşfet", icon: Compass },
+  { href: "/siralama", label: "Sıralama", icon: Trophy },
+  { href: "/challenge", label: "Challenge", icon: Swords },
+  { href: "/firsatlar", label: "Fırsatlar", icon: Briefcase },
+  { href: "/?akis=takip", label: "Takip ettiklerin", icon: Users },
+  { href: "/profil/kaydedilenler", label: "Kaydedilenler", icon: Bookmark },
 ];
 
-// Masaüstü üst menü; mobilde aynı linkler hesap menüsünde. Girişsizde hesap gerektirenler gizli.
-export function NavLinks({ loggedIn = true }: { loggedIn?: boolean }) {
+// Masaüstü üst menü; mobilde aynı linkler hesap menüsünde.
+export function NavLinks() {
   const active = useActive();
   return (
     <nav aria-label="Ana menü" className="hidden flex-1 gap-7 text-sm font-medium md:flex">
-      {LINKS.filter((l) => loggedIn || !l.auth).map((l) => (
+      {LINKS.map((l) => (
         <Link
           key={l.href}
           href={l.href}
